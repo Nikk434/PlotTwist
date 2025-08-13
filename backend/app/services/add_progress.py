@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import datetime
 from bson import ObjectId
-from models.progress import DailyProgressModel
-from core.database import progress_collection, user_collection
-from utils.dependency import get_current_user
+from app.models.progress import DailyProgressModel
+from app.core.database import progress_collection, user_collection
+from app.utils.dependency import get_current_user
 from fastapi import Response
 router = APIRouter()
 

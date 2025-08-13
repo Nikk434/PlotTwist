@@ -1,6 +1,6 @@
 from datetime import datetime,timedelta
 from jose import jwt
-from core.config import JWT_SECRET,JWT_ALGO,JWT_EXPIRY
+from app.core.config import JWT_SECRET,JWT_ALGO,JWT_EXPIRY
 
 from jose import JWTError, jwt
 

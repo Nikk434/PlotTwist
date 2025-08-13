@@ -1,7 +1,7 @@
 from jose import JWTError,jwt
 from fastapi import HTTPException, status
 from datetime import datetime
-from auth.jwt_utils import JWT_ALGO,JWT_EXPIRY,JWT_SECRET
+from app.auth.jwt_utils import JWT_ALGO,JWT_EXPIRY,JWT_SECRET
 
 def decode_jwt(token):
     try:

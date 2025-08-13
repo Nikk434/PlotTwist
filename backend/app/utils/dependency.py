@@ -2,8 +2,8 @@ from fastapi import Depends, Security
 from fastapi.security import OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 from fastapi import Request, HTTPException, status
-from utils.validate import decode_jwt
-from core.database import user_collection
+from app.utils.validate import decode_jwt
+from app.core.database import user_collection
 from bson import ObjectId
 
 async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
