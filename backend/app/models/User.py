@@ -6,14 +6,13 @@
 #  email
 #  password
 #  gender
-#  daily_goal
-#  friends
-#   [list of other users]
-from typing import List, Optional
+#  level - enthusiast, bigineer, film school student, professional, 
+#  if professional then ask for total industry experience, valid documents, recent work 
+#  if film school student then ask for valid documents
+from typing import List, Optional, Literal
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from bson import ObjectId
-from models.daily_goals import DailyGoal
 
 # To handle MongoDB ObjectId as string
 class PyObjectId(ObjectId):
@@ -32,13 +31,34 @@ class PyObjectId(ObjectId):
 class UserModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     name: str
-    # dob: date
     dob: datetime
     email: EmailStr
     password: str
-    gender: str
-    daily_goal: DailyGoal
-    friends: List[str] = []
+    gender: Literal["male", "female", "other"]
+    level: Literal["enthusiast", "beginner", "film_school_student", "professional"]
+
+    total_industry_experience: Optional[int] = Field(None, ge=0)
+    valid_documents: Optional[str]  # Could be a URL or file path
+    recent_work: Optional[str]      # Could be a URL or file path
+    # friends: List[str] = []
+
+    #@validator("total_industry_experience", always=True)
+    def require_experience_for_professional(cls, v, values):
+        if values.get("level") == "professional" and v is None:
+            raise ValueError("Total industry experience is required for professionals")
+        return v
+
+    #@validator("valid_documents", always=True)
+    def require_documents_for_specific_levels(cls, v, values):
+        if values.get("level") in ["professional", "film_school_student"] and not v:
+            raise ValueError("Valid documents are required for professionals and film school students")
+        return v
+
+    #@validator("recent_work", always=True)
+    def require_recent_work_for_professional(cls, v, values):
+        if values.get("level") == "professional" and not v:
+            raise ValueError("Recent work is required for professionals")
+        return v
 
     class Config:
         allow_population_by_field_name = True
@@ -46,18 +66,15 @@ class UserModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "name": "Hydra Doe",
-                "dob": "1995-06-15",
-                "email": "hydra@example.com",
+                "name": "Alex Director",
+                "dob": "1990-08-12T00:00:00",
+                "email": "alex@example.com",
                 "password": "hashed_password_here",
-                "gender": "female",
-                "daily_goal": {
-                    "glasses_per_day": 8,
-                    "interval_minutes": 60,
-                    "start_time": "09:00",
-                    "end_time": "21:00"
-                },
-                "friends": ["60d5f4838b1b2c6f3f3f2a4d"]
+                "gender": "male",
+                "level": "professional",
+                "total_industry_experience": 7,
+                "valid_documents": "https://link-to-documents.com/proof.pdf",
+                "recent_work": "https://portfolio.com/recent_project",
             }
         }
 
@@ -67,9 +84,31 @@ class UserCreate(BaseModel):
     dob: datetime
     email: EmailStr
     password: str
-    gender: str
-    daily_goal: DailyGoal
-    friends : List[str]
+    gender: Literal["male", "female", "other"]
+    level: Literal["enthusiast", "beginner", "film_school_student", "professional"]
+
+    total_industry_experience: Optional[int] = Field(None, ge=0)
+    valid_documents: Optional[str]
+    recent_work: Optional[str]
+    friends: List[str] = []
+
+    #@validator("total_industry_experience", always=True)
+    def require_experience_for_professional(cls, v, values):
+        if values.get("level") == "professional" and v is None:
+            raise ValueError("Total industry experience is required for professionals")
+        return v
+
+    #@validator("valid_documents", always=True)
+    def require_documents_for_specific_levels(cls, v, values):
+        if values.get("level") in ["professional", "film_school_student"] and not v:
+            raise ValueError("Valid documents are required for professionals and film school students")
+        return v
+
+    #@validator("recent_work", always=True)
+    def require_recent_work_for_professional(cls, v, values):
+        if values.get("level") == "professional" and not v:
+            raise ValueError("Recent work is required for professionals")
+        return v
 
     class Config:
         orm_mode = True

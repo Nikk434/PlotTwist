@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from auth import register  # This is your /register route module
-from auth import login
-from auth import refresh
+# from baauth import register
+from app.auth import register  # This is your /register route module
+from app.auth import login
+from app.auth import refresh
 # from routers import protected_route
-from services import user_profile
-from services import add_progress 
+# from services import user_profile
+from app.services import user_profile
+from app.services import add_progress 
 # from set_reminders import set
 # from notification import send, subscribe
 # from set_reminders import router as set_or_update_reminder
