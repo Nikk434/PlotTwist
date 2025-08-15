@@ -10,24 +10,28 @@
 #  if professional then ask for total industry experience, valid documents, recent work 
 #  if film school student then ask for valid documents
 from typing import List, Optional, Literal
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
 from datetime import datetime
 from bson import ObjectId
+from pydantic_core import core_schema
+from typing import Any
 
-# To handle MongoDB ObjectId as string
+
 class PyObjectId(ObjectId):
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(cls, source_type: Any, handler):
+        return core_schema.no_info_wrap_validator_function(
+            cls.validate,
+            core_schema.str_schema()
+        )
 
     @classmethod
-    def validate(cls, v):
+    def validate(cls, v: Any) -> str:
         if not ObjectId.is_valid(v):
             raise ValueError("Invalid ObjectId")
         return str(v)
 
 
-# ✅ This is the model used when storing/retrieving from the DB
 class UserModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     name: str
@@ -37,31 +41,28 @@ class UserModel(BaseModel):
     gender: Literal["male", "female", "other"]
     level: Literal["enthusiast", "beginner", "film_school_student", "professional"]
 
-    total_industry_experience: Optional[int] = Field(None, ge=0)
-    valid_documents: Optional[str]  # Could be a URL or file path
-    recent_work: Optional[str]      # Could be a URL or file path
-    # friends: List[str] = []
+    total_industry_experience: Optional[int] = Field(default=None, ge=0)
+    valid_documents: Optional[str] = None
+    recent_work: Optional[str] = None
 
-    #@validator("total_industry_experience", always=True)
-    def require_experience_for_professional(cls, v, values):
-        if values.get("level") == "professional" and v is None:
-            raise ValueError("Total industry experience is required for professionals")
-        return v
-
-    #@validator("valid_documents", always=True)
-    def require_documents_for_specific_levels(cls, v, values):
-        if values.get("level") in ["professional", "film_school_student"] and not v:
-            raise ValueError("Valid documents are required for professionals and film school students")
-        return v
-
-    #@validator("recent_work", always=True)
-    def require_recent_work_for_professional(cls, v, values):
-        if values.get("level") == "professional" and not v:
-            raise ValueError("Recent work is required for professionals")
-        return v
+    @model_validator(mode='after')
+    def validate_level_requirements(self):
+        if self.level == "professional":
+            if self.total_industry_experience is None:
+                raise ValueError("Total industry experience is required for professionals")
+            if not self.recent_work:
+                raise ValueError("Recent work is required for professionals")
+            if not self.valid_documents:
+                raise ValueError("Valid documents are required for professionals")
+        
+        if self.level == "film_school_student":
+            if not self.valid_documents:
+                raise ValueError("Valid documents are required for film school students")
+        
+        return self
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
         schema_extra = {
@@ -88,27 +89,25 @@ class UserCreate(BaseModel):
     level: Literal["enthusiast", "beginner", "film_school_student", "professional"]
 
     total_industry_experience: Optional[int] = Field(None, ge=0)
-    valid_documents: Optional[str]
-    recent_work: Optional[str]
+    valid_documents: Optional[str] = None
+    recent_work: Optional[str] = None
     friends: List[str] = []
 
-    #@validator("total_industry_experience", always=True)
-    def require_experience_for_professional(cls, v, values):
-        if values.get("level") == "professional" and v is None:
-            raise ValueError("Total industry experience is required for professionals")
-        return v
-
-    #@validator("valid_documents", always=True)
-    def require_documents_for_specific_levels(cls, v, values):
-        if values.get("level") in ["professional", "film_school_student"] and not v:
-            raise ValueError("Valid documents are required for professionals and film school students")
-        return v
-
-    #@validator("recent_work", always=True)
-    def require_recent_work_for_professional(cls, v, values):
-        if values.get("level") == "professional" and not v:
-            raise ValueError("Recent work is required for professionals")
-        return v
+    @model_validator(mode='after')
+    def validate_level_requirements(self):
+        if self.level == "professional":
+            if self.total_industry_experience is None:
+                raise ValueError("Total industry experience is required for professionals")
+            if not self.recent_work:
+                raise ValueError("Recent work is required for professionals")
+            if not self.valid_documents:
+                raise ValueError("Valid documents are required for professionals")
+        
+        if self.level == "film_school_student":
+            if not self.valid_documents:
+                raise ValueError("Valid documents are required for film school students")
+        
+        return self
 
     class Config:
-        orm_mode = True
+        from_attributes = True
