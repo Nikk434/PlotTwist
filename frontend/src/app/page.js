@@ -1,9 +1,10 @@
 import LoginPage from "./auth/login/page";
-import Tiptap from "./components/tiptap";
+import TreatmentEditor from "./components/tiptap";
+// import Tiptap from "./components/tiptap";
 
 export default function Home() {
   return (
     <LoginPage/>,    
-    <Tiptap/>
+    <TreatmentEditor/>
   );
 }
