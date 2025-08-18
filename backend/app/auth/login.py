@@ -9,13 +9,13 @@
 # router = APIRouter()
 
 # class LoginRequest(BaseModel):
-#     name:str
+#     username:str
 #     password:str
 
 # @router.post("/login",status_code=200)
 # async def login(creds: LoginRequest):
-#     db_user =  await user_collection.find_one({"name":creds.name})
-#     print(creds.name)
+#     db_user =  await user_collection.find_one({"username":creds.username})
+#     print(creds.username)
 #     if not db_user:
 #         raise HTTPException(
 #             status_code=404,
@@ -29,7 +29,7 @@
 #         )
 #     token = create_jwt_token(data={"sub":str(db_user["_id"])})
 #     return {
-#         "message":"Welcome back "+str(creds.name)+"!",
+#         "message":"Welcome back "+str(creds.username)+"!",
 #         "user_id":str(db_user["_id"]),
 #         "access_token":token,
 #         "token_type":"bearer"
@@ -46,12 +46,12 @@ from pydantic import BaseModel
 router = APIRouter()
 
 class LoginRequest(BaseModel):
-    name: str
+    username: str
     password: str
 
 @router.post("/login", status_code=200)
 async def login(creds: LoginRequest, response: Response):
-    db_user = await user_collection.find_one({"name": creds.name})
+    db_user = await user_collection.find_one({"username": creds.username})
     
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -99,7 +99,7 @@ async def login(creds: LoginRequest, response: Response):
 
 
     return {
-        "message": f"Welcome back {creds.name}!",
+        "message": f"Welcome back {creds.username}!",
         "user_id": user_id,
         "access_token":access_token,
         "refresh_token":refresh_token

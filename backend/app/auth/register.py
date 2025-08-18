@@ -16,7 +16,7 @@ async def register(user: UserCreate):
         )
 
     # Check for duplicate name (username)
-    if await user_collection.find_one({"name": user.name}):
+    if await user_collection.find_one({"name": user.username}):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already taken"
