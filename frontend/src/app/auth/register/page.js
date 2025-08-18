@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -21,7 +21,7 @@ export default function RegisterPage() {
     valid_documents: '',
     recent_work: ''
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
@@ -32,7 +32,7 @@ export default function RegisterPage() {
       ...prev,
       [field]: value
     }));
-    
+
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -44,7 +44,7 @@ export default function RegisterPage() {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
+    if (!formData.username.trim()) newErrors.username = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
     if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
@@ -80,16 +80,16 @@ export default function RegisterPage() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     try {
       const submitData = {
-        name: formData.name.trim(),
+        username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
         dob: new Date(formData.dob).toISOString(),
         gender: formData.gender,
         level: formData.level,
-        friends: []
+        // friends: []
       };
 
       if (formData.level === 'professional') {
@@ -102,11 +102,9 @@ export default function RegisterPage() {
         submitData.valid_documents = formData.valid_documents.trim();
       }
 
-      const response = await fetch('http://localhost:8000/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(submitData),
       });
 
@@ -114,7 +112,7 @@ export default function RegisterPage() {
 
       if (response.ok) {
         alert('Registration successful! You can now login.');
-        window.location.href = '/login';
+        window.location.href = '/auth/login';
       } else {
         setErrors({ submit: data.detail || 'Registration failed' });
       }
@@ -205,7 +203,7 @@ export default function RegisterPage() {
             Create your account and start battling with creative minds
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <div className="space-y-4">
             {errors.submit && (
@@ -218,18 +216,18 @@ export default function RegisterPage() {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Full Name *</Label>
+                <Label>Username *</Label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="Enter your full name"
-                    className={`pl-10 ${errors.name ? 'border-red-500' : ''}`}
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Enter a unique username"
+                    className={`pl-10 ${errors.username ? 'border-red-500' : ''}`}
+                    value={formData.username}
+                    onChange={(e) => handleInputChange('username', e.target.value)}
                   />
                 </div>
-                {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+                {errors.username && <p className="text-sm text-red-600">{errors.username}</p>}
               </div>
 
               <div className="space-y-2">
@@ -264,8 +262,8 @@ export default function RegisterPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
-                    {showPassword ? 
-                      <EyeSlashIcon className="h-5 w-5 text-gray-400" /> : 
+                    {showPassword ?
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400" /> :
                       <EyeIcon className="h-5 w-5 text-gray-400" />
                     }
                   </button>
@@ -288,8 +286,8 @@ export default function RegisterPage() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
                   >
-                    {showConfirmPassword ? 
-                      <EyeSlashIcon className="h-5 w-5 text-gray-400" /> : 
+                    {showConfirmPassword ?
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400" /> :
                       <EyeIcon className="h-5 w-5 text-gray-400" />
                     }
                   </button>
@@ -347,7 +345,7 @@ export default function RegisterPage() {
 
             {renderConditionalFields()}
 
-            <Button 
+            <Button
               onClick={handleSubmit}
               className="w-full bg-purple-600 hover:bg-purple-700"
               disabled={isLoading}
