@@ -57,7 +57,7 @@
 //     const [currentSection, setCurrentSection] = useState(0)
 //         const [sectionContent, setSectionContent] = useState({})
 //         const [sectionWordCounts, setSectionWordCounts] = useState({})
-    
+
 //         const currentSectionData = TREATMENT_SECTIONS[currentSection]
 
 //     const editor = useEditor({
@@ -266,7 +266,7 @@
 //     if (!editor) {
 //         return <div className="p-4 border rounded-xl h-32 animate-pulse bg-gray-100"></div>
 //     }
-    
+
 //     const currentWordCount = sectionWordCounts[currentSectionData.id] || 0
 //     const progress = Math.min((currentWordCount / currentSectionData.minWords) * 100, 100)
 
@@ -629,38 +629,52 @@ const EDITOR_EXTENSIONS = [
 ]
 
 const TOOLBAR_BUTTONS = [
-  { type: 'group', items: [
-    { id: 'undo', label: 'Undo', action: (editor) => editor.chain().focus().undo().run(), canExecute: (editor) => editor.can().undo() },
-    { id: 'redo', label: 'Redo', action: (editor) => editor.chain().focus().redo().run(), canExecute: (editor) => editor.can().redo() }
-  ]},
-  { type: 'group', items: [
-    { id: 'h1', label: 'H1', action: (editor) => editor.chain().focus().toggleHeading({ level: 1 }).run(), isActive: (editor) => editor.isActive('heading', { level: 1 }) },
-    { id: 'h2', label: 'H2', action: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(), isActive: (editor) => editor.isActive('heading', { level: 2 }) },
-    { id: 'h3', label: 'H3', action: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(), isActive: (editor) => editor.isActive('heading', { level: 3 }) },
-    { id: 'h4', label: 'H4', action: (editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(), isActive: (editor) => editor.isActive('heading', { level: 4 }) }
-  ]},
-  { type: 'group', items: [
-    { id: 'bulletList', label: '• List', action: (editor) => editor.chain().focus().toggleBulletList().run(), isActive: (editor) => editor.isActive('bulletList') },
-    { id: 'orderedList', label: '1. List', action: (editor) => editor.chain().focus().toggleOrderedList().run(), isActive: (editor) => editor.isActive('orderedList') }
-  ]},
-  { type: 'group', items: [
-    { id: 'bold', label: 'B', action: (editor) => editor.chain().focus().toggleBold().run(), isActive: (editor) => editor.isActive('bold'), style: { fontWeight: 'bold' } },
-    { id: 'italic', label: 'I', action: (editor) => editor.chain().focus().toggleItalic().run(), isActive: (editor) => editor.isActive('italic'), style: { fontStyle: 'italic' } },
-    { id: 'underline', label: 'U', action: (editor) => editor.chain().focus().toggleUnderline().run(), isActive: (editor) => editor.isActive('underline'), style: { textDecoration: 'underline' } }
-  ]},
-  { type: 'group', items: [
-    { id: 'highlight', label: 'Highlight', action: (editor) => editor.chain().focus().toggleHighlight().run(), isActive: (editor) => editor.isActive('highlight') }
-  ]},
-  { type: 'group', items: [
-    { id: 'subscript', label: 'X₂', action: (editor) => editor.chain().focus().toggleSubscript().run(), isActive: (editor) => editor.isActive('subscript') },
-    { id: 'superscript', label: 'X²', action: (editor) => editor.chain().focus().toggleSuperscript().run(), isActive: (editor) => editor.isActive('superscript') }
-  ]},
-  { type: 'group', items: [
-    { id: 'align-left', label: '⬅', action: (editor) => editor.chain().focus().setTextAlign('left').run(), isActive: (editor) => editor.isActive({ textAlign: 'left' }) },
-    { id: 'align-center', label: '↔', action: (editor) => editor.chain().focus().setTextAlign('center').run(), isActive: (editor) => editor.isActive({ textAlign: 'center' }) },
-    { id: 'align-right', label: '➡', action: (editor) => editor.chain().focus().setTextAlign('right').run(), isActive: (editor) => editor.isActive({ textAlign: 'right' }) },
-    { id: 'align-justify', label: '⬌', action: (editor) => editor.chain().focus().setTextAlign('justify').run(), isActive: (editor) => editor.isActive({ textAlign: 'justify' }) }
-  ]}
+  {
+    type: 'group', items: [
+      { id: 'undo', label: 'Undo', action: (editor) => editor.chain().focus().undo().run(), canExecute: (editor) => editor.can().undo() },
+      { id: 'redo', label: 'Redo', action: (editor) => editor.chain().focus().redo().run(), canExecute: (editor) => editor.can().redo() }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'h1', label: 'H1', action: (editor) => editor.chain().focus().toggleHeading({ level: 1 }).run(), isActive: (editor) => editor.isActive('heading', { level: 1 }) },
+      { id: 'h2', label: 'H2', action: (editor) => editor.chain().focus().toggleHeading({ level: 2 }).run(), isActive: (editor) => editor.isActive('heading', { level: 2 }) },
+      { id: 'h3', label: 'H3', action: (editor) => editor.chain().focus().toggleHeading({ level: 3 }).run(), isActive: (editor) => editor.isActive('heading', { level: 3 }) },
+      { id: 'h4', label: 'H4', action: (editor) => editor.chain().focus().toggleHeading({ level: 4 }).run(), isActive: (editor) => editor.isActive('heading', { level: 4 }) }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'bulletList', label: '• List', action: (editor) => editor.chain().focus().toggleBulletList().run(), isActive: (editor) => editor.isActive('bulletList') },
+      { id: 'orderedList', label: '1. List', action: (editor) => editor.chain().focus().toggleOrderedList().run(), isActive: (editor) => editor.isActive('orderedList') }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'bold', label: 'B', action: (editor) => editor.chain().focus().toggleBold().run(), isActive: (editor) => editor.isActive('bold'), style: { fontWeight: 'bold' } },
+      { id: 'italic', label: 'I', action: (editor) => editor.chain().focus().toggleItalic().run(), isActive: (editor) => editor.isActive('italic'), style: { fontStyle: 'italic' } },
+      { id: 'underline', label: 'U', action: (editor) => editor.chain().focus().toggleUnderline().run(), isActive: (editor) => editor.isActive('underline'), style: { textDecoration: 'underline' } }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'highlight', label: 'Highlight', action: (editor) => editor.chain().focus().toggleHighlight().run(), isActive: (editor) => editor.isActive('highlight') }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'subscript', label: 'X₂', action: (editor) => editor.chain().focus().toggleSubscript().run(), isActive: (editor) => editor.isActive('subscript') },
+      { id: 'superscript', label: 'X²', action: (editor) => editor.chain().focus().toggleSuperscript().run(), isActive: (editor) => editor.isActive('superscript') }
+    ]
+  },
+  {
+    type: 'group', items: [
+      { id: 'align-left', label: '⬅', action: (editor) => editor.chain().focus().setTextAlign('left').run(), isActive: (editor) => editor.isActive({ textAlign: 'left' }) },
+      { id: 'align-center', label: '↔', action: (editor) => editor.chain().focus().setTextAlign('center').run(), isActive: (editor) => editor.isActive({ textAlign: 'center' }) },
+      { id: 'align-right', label: '➡', action: (editor) => editor.chain().focus().setTextAlign('right').run(), isActive: (editor) => editor.isActive({ textAlign: 'right' }) },
+      { id: 'align-justify', label: '⬌', action: (editor) => editor.chain().focus().setTextAlign('justify').run(), isActive: (editor) => editor.isActive({ textAlign: 'justify' }) }
+    ]
+  }
 ]
 
 function ToolbarButton({ button, editor }) {
@@ -671,11 +685,10 @@ function ToolbarButton({ button, editor }) {
     <button
       onClick={() => button.action(editor)}
       disabled={!canExecute}
-      className={`px-3 py-1.5 text-sm border rounded ${
-        isActive 
-          ? 'bg-blue-50 border-blue-200 text-blue-700' 
+      className={`px-3 py-1.5 text-sm border rounded ${isActive
+          ? 'bg-blue-50 border-blue-200 text-blue-700'
           : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-      } ${!canExecute ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        } ${!canExecute ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       style={button.style}
     >
       {button.label}
@@ -705,13 +718,12 @@ function SectionHeader({ section, wordCount, progress }) {
     <div className="p-4 bg-gray-50 border-b border-gray-200">
       <h3 className="text-xl font-bold mb-2">{section.title}</h3>
       <p className="text-gray-600 text-sm mb-3">{section.description}</p>
-      
+
       <div className="flex items-center gap-3">
         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-300 ${
-              progress >= 100 ? 'bg-green-500' : 'bg-blue-500'
-            }`}
+          <div
+            className={`h-full transition-all duration-300 ${progress >= 100 ? 'bg-green-500' : 'bg-blue-500'
+              }`}
             style={{ width: `${Math.min(progress, 100)}%` }}
           />
         </div>
@@ -747,15 +759,14 @@ function SectionNavigation({ sections, currentIndex, wordCounts, onSectionChange
             key={section.id}
             onClick={() => accessible && onSectionChange(index)}
             disabled={!accessible}
-            className={`p-2 text-xs rounded-md border transition-colors ${
-              current 
-                ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' 
+            className={`p-2 text-xs rounded-md border transition-colors ${current
+                ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
                 : completed
-                ? 'border-green-300 bg-green-50 text-green-700'
-                : accessible
-                ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
+                  ? 'border-green-300 bg-green-50 text-green-700'
+                  : accessible
+                    ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                    : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
           >
             {completed && '✓ '}{section.title}
           </button>
@@ -774,23 +785,21 @@ function NavigationButtons({ currentIndex, sectionsLength, canProceed, onPreviou
       <button
         onClick={onPrevious}
         disabled={isFirst}
-        className={`px-4 py-2 text-sm rounded-md border ${
-          isFirst 
+        className={`px-4 py-2 text-sm rounded-md border ${isFirst
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-        }`}
+          }`}
       >
         Previous
       </button>
-      
+
       <button
         onClick={onNext}
         disabled={isLast || !canProceed}
-        className={`px-4 py-2 text-sm rounded-md border ${
-          (isLast || !canProceed)
+        className={`px-4 py-2 text-sm rounded-md border ${(isLast || !canProceed)
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'border-blue-300 bg-blue-500 text-white hover:bg-blue-600'
-        }`}
+          }`}
       >
         {isLast ? 'Finish' : 'Next'}
       </button>
@@ -819,12 +828,12 @@ export default function TreatmentEditor() {
       const html = editor.getHTML()
       const text = editor.getText()
       const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length
-      
+
       setSectionContent(prev => ({
         ...prev,
         [currentSectionData.id]: html
       }))
-      
+
       setSectionWordCounts(prev => ({
         ...prev,
         [currentSectionData.id]: wordCount
@@ -859,7 +868,42 @@ export default function TreatmentEditor() {
       setCurrentSection(currentSection + 1)
     }
   }
+  const exportData = () => {
+    return {
+      sections: sectionContent,
+      wordCounts: sectionWordCounts,
+      completedSections: TREATMENT_SECTIONS.filter(section => 
+        (sectionWordCounts[section.id] || 0) >= section.minWords
+      ).map(s => s.id),
+      metadata: {
+        totalWords: Object.values(sectionWordCounts).reduce((a, b) => a + b, 0),
+        completedAt: new Date().toISOString(),
+        progress: (Object.keys(sectionContent).length / TREATMENT_SECTIONS.length) * 100
+      }
+    }
+  }
 
+  const handleSubmit = async () => {
+    const data = exportData()
+    console.log("Exp data = = ",data);
+    
+    try {
+      const response = await fetch('/api/editor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      
+      if (!response.ok) throw new Error('Failed to save')
+      
+      const result = await response.json()
+      console.log('Success:', result)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
   if (!editor) {
     return (
       <div className="w-full max-w-4xl mx-auto p-4">
@@ -878,7 +922,7 @@ export default function TreatmentEditor() {
             Section {currentSection + 1} of {TREATMENT_SECTIONS.length}
           </span>
         </div>
-        
+
         <SectionNavigation
           sections={TREATMENT_SECTIONS}
           currentIndex={currentSection}
@@ -894,13 +938,13 @@ export default function TreatmentEditor() {
           wordCount={currentWordCount}
           progress={progress}
         />
-        
+
         <Toolbar editor={editor} />
-        
+
         <div className="bg-white min-h-48 text-black">
           <EditorContent editor={editor} />
         </div>
-        
+
         <NavigationButtons
           currentIndex={currentSection}
           sectionsLength={TREATMENT_SECTIONS.length}
@@ -908,6 +952,12 @@ export default function TreatmentEditor() {
           onPrevious={handlePrevious}
           onNext={handleNext}
         />
+        <button
+          onClick={handleSubmit}
+          className="px-4 py-2 bg-green-500 text-white rounded-md"
+        >
+          Export Treatment
+        </button>
       </div>
     </div>
   )
