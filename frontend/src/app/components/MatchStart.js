@@ -165,13 +165,13 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
 
             // Call the parent callback if needed
             onStartMatch?.(settings)
-
+            window.location.href = '/StoryEditor';
         } catch (error) {
             console.error('Error creating match:', error.message)
             setErrors({ general: error.message })  // Show error in UI
         }
     }
-    
+
 
 
     const summaryItems = [
@@ -254,13 +254,13 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                             badge={{ type: 'fixed', text: 'FIXED' }}
                         />
 
-                        <div style={{ marginBottom: '16px' }}>
+                        {/* <div style={{ marginBottom: '16px' }}>
                             <CheckboxField
                                 checked={settings.isBlindPrompt}
                                 onChange={(e) => updateSetting('isBlindPrompt', e.target.checked)}
                                 label="Blind Challenge (prompt revealed after match starts)"
                             />
-                        </div>
+                        </div> */}
 
                         <select
                             value={settings.promptType}

@@ -139,7 +139,8 @@ class RawTreatmentData(BaseModel):
 
 class ProcessedTreatmentData(BaseModel):
     """Model for processed and validated treatment data"""
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    # id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    user_id:str
     
     # Clean text content (HTML stripped)
     title_page: str
@@ -255,27 +256,27 @@ def validate_treatment_data(raw_data: dict) -> ProcessedTreatmentData:
 # Example usage with your data:
 if __name__ == "__main__":
     # Your sample data
-    sample_data = {
-        "sections": {
-            'title-page': '<p style="margin: 8px 0px; line-height: 1.5;">h tr ertg ergt gtr geg e</p>',
-            'logline': '<p style="margin: 8px 0px; line-height: 1.5;">ertg erge e e  we w w w wr wr wr </p>',
-            # ... rest of your data
-        },
-        "wordCounts": {
-            'title-page': 7,
-            'logline': 11,
-            # ... etc
-        },
-        "completedSections": ['title-page', 'logline'],
-        "metadata": {
-            "totalWords": 686,
-            "completedAt": "2025-08-19T06:13:32.471Z",
-            "progress": 100
-        }
-    }
+    # sample_data = {
+    #     "sections": {
+    #         'title-page': '<p style="margin: 8px 0px; line-height: 1.5;">h tr ertg ergt gtr geg e</p>',
+    #         'logline': '<p style="margin: 8px 0px; line-height: 1.5;">ertg erge e e  we w w w wr wr wr </p>',
+    #         # ... rest of your data
+    #     },
+    #     "wordCounts": {
+    #         'title-page': 7,
+    #         'logline': 11,
+    #         # ... etc
+    #     },
+    #     "completedSections": ['title-page', 'logline'],
+    #     "metadata": {
+    #         "totalWords": 686,
+    #         "completedAt": "2025-08-19T06:13:32.471Z",
+    #         "progress": 100
+    #     }
+    # }
     
     try:
-        validated_treatment = validate_treatment_data(sample_data)
+        validated_treatment = validate_treatment_data()
         print("✅ Validation successful!")
         print(f"Title: {validated_treatment.title_page}")
         print(f"Logline: {validated_treatment.logline}")
