@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+// import MatchSettings from '../components/MatchStart';
+import { useRouter } from 'next/navigation';
 import { 
   PlayIcon, 
   TrophyIcon, 
@@ -15,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function HomePage() {
+  const router=useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock authentication
 
   // Mock data for featured battles
@@ -80,7 +83,9 @@ export default function HomePage() {
       default: return 'Unknown';
     }
   };
-
+  // function StartBattle() {
+    // const [BattleStart,setBattleStart] = useState(false);
+  // }
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -98,7 +103,8 @@ export default function HomePage() {
                   <TrophyIcon className="h-4 w-4 mr-2" />
                   Leaderboard
                 </Button>
-                <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+                <Button size="sm" className="bg-purple-600 hover:bg-purple-700"
+                  >
                   <PlayIcon className="h-4 w-4 mr-2" />
                   Quick Battle
                 </Button>
@@ -133,10 +139,14 @@ export default function HomePage() {
           
           {!isLoggedIn && (
             <div className="flex justify-center space-x-4">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
+              <Button size="lg" className="bg-purple-600 hover:bg-purple-700"
+                // onClick={()=>setBattleStart(true)}
+                onClick={()=>router.push("match/start")}
+                >
                 <PlayIcon className="h-5 w-5 mr-2" />
                 Start Your First Battle
               </Button>
+              {/* {BattleStart && <MatchSettings/>} */}
               <Button variant="outline" size="lg">
                 <LightBulbIcon className="h-5 w-5 mr-2" />
                 How It Works
