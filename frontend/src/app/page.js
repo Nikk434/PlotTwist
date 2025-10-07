@@ -3,6 +3,7 @@ import LoginPage from "./auth/login/page";
 // import TreatmentEditor from "./components/tiptap";
 // import Tiptap from "./components/tiptap";
 import MatchSettings from "./components/MatchStart";
+import HomePage from "./home/page";
 
 export default function Home() {
   const handleStartMatch = (settings) => {
@@ -17,10 +18,11 @@ export default function Home() {
   
   return (
     // <LoginPage />
-    <MatchSettings
-    onStartMatch={handleStartMatch}
-    onCancel={handleCancel}
-  />
+    <HomePage/>
+    // <MatchSettings
+    // onStartMatch={handleStartMatch}
+    // onCancel={handleCancel}
+  // />
     // ,    
     // <TreatmentEditor/>
   );

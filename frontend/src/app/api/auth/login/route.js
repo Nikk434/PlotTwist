@@ -24,22 +24,22 @@ export async function POST(req) {
     const accessToken = data.access_token;
     const refreshToken = data.refresh_token;
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     // Access token cookie
     cookieStore.set({
-      username: "access_token",
+      name: "access_token",
       value: accessToken,
       httpOnly: true,
       secure: false, // change to true in production
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 15 * 60,
       path: "/",
     });
 
     // Refresh token cookie
     cookieStore.set({
-      username: "refresh_token",
+      name: "refresh_token",
       value: refreshToken,
       httpOnly: true,
       secure: false, // change to true in production
