@@ -28,13 +28,13 @@ async def user_profile(user: dict = Depends(get_current_user)):
     consumed_today = today_progress["consumed_today"] if today_progress else 0
     
     return {
-        "message": f"Profile for user {user['name']}",
+        "message": f"Profile for user {user['username']}",
         "profile": {
             "user_id": str(user["_id"]),
-            "name": user["name"],
-            "consumed_today": consumed_today,
-            "reminder_start": user["daily_goal"]["start_time"],
-            "glasses_per_day": user["daily_goal"]["glasses_per_day"],
-            "total_glasses": total_glasses
+            "username": user["username"],
+            # "consumed_today": consumed_today,
+            # "reminder_start": user["daily_goal"]["start_time"],
+            # "glasses_per_day": user["daily_goal"]["glasses_per_day"],
+            # "total_glasses": total_glasses
         }
     }
