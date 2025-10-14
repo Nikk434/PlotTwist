@@ -100,6 +100,7 @@ async def login(creds: LoginRequest, response: Response):
 
     return {
         "message": f"Welcome back {creds.username}!",
+        "username":creds.username,
         "user_id": user_id,
         "access_token":access_token,
         "refresh_token":refresh_token
