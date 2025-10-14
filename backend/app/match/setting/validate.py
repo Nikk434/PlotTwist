@@ -12,30 +12,11 @@ class MatchResponse(BaseModel):
     success: bool
     data: dict
 
-@router.post("/match/create")
-async def create_match(settings: MatchSettings):
-    try:
-        # Generate match ID (use UUID in production)
-        # match_id = f"match_{int(time.time() * 1000)}"
-        
-        # Save to database
-        # await db.insert_match(match_id, settings.model_dump())
-        
-        return {
-            "success": True,
-            "data": {
-                # "matchId": match_id,
-                "settings": settings.model_dump()
-            }
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Server error while creating match: {str(e)}"
-        )
-
 @router.post("/match/create", response_model=MatchResponse)
 async def create_match_typed(settings: MatchSettings):
+    print("LOG 2")
+    print("SET 2 =",settings)
+    
     return {
         "success": True,
         "data": {

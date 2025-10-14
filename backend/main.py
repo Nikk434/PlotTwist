@@ -12,6 +12,7 @@ from app.services import add_progress
 # from notification import send, subscribe
 # from set_reminders import router as set_or_update_reminder
 # from routers.notifications import router as notification_router
+from app.match.setting import validate
 from app.services import editor
 app = FastAPI()
 app.add_middleware(
@@ -34,4 +35,5 @@ app.include_router(editor.router)
 # app.include_router(notification_router)
 # app.include_router(send.router,tags=["U send noti"])
 # app.include_router(subscribe.router,tags=["noti hora ke"])
+app.include_router(validate.router,tags=["pop"])
 
