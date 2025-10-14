@@ -15,5 +15,6 @@ user_collection = db["users"]
 progress_collection = db["progress"]
 reminder_collection = db["reminders"]
 subscription_collection = db["subscription"]
+match_setting = db["match"]
 # Optional: Ensure email is unique
 user_collection.create_index([("email", ASCENDING)], unique=True)
