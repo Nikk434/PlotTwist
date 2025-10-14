@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react';
+// import { useState } from 'react';
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,8 +19,33 @@ import {
 
 export default function HomePage() {
   const router=useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Mock authentication
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  // const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  useEffect(() => {
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/auth/me", {
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
+      });
+      const data = await res.json();
+      console.log("res",data.profile.username);
+      if (res.ok) {
+        console.log("OPOPOP");
+        setUsername(data.profile.username);
+        setIsLoggedIn(true);
+      }
+    } catch (err) {
+        console.log("popop");
 
+      setIsLoggedIn(false);
+    }
+  };
+
+  checkAuth();
+}, []);
   // Mock data for featured battles
   const featuredBattles = [
     {
@@ -109,7 +135,7 @@ export default function HomePage() {
                   Quick Battle
                 </Button>
                 <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                  U
+                  {username}
                 </div>
               </>
             ) : (
@@ -137,7 +163,7 @@ export default function HomePage() {
             Write scripts, develop characters, and prove your creative skills in real-time.
           </p>
           
-          {!isLoggedIn && (
+          {
             <div className="flex justify-center space-x-4">
               <Button size="lg" className="bg-purple-600 hover:bg-purple-700"
                 // onClick={()=>setBattleStart(true)}
@@ -152,7 +178,7 @@ export default function HomePage() {
                 How It Works
               </Button>
             </div>
-          )}
+          }
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
