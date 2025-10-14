@@ -75,8 +75,10 @@ export async function POST(request) {
     console.log("Incoming settings:", settings)
 
     // Forward to FastAPI backend
-    const response = await fetch('http://127.0.0.1:8000/match/create', {
+    const response = await fetch('http://localhost:8000/match/create', {
       method: 'POST',
+      credentials: "include",
+
       headers: {
         'Content-Type': 'application/json',
       },

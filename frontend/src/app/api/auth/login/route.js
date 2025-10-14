@@ -5,8 +5,9 @@ export async function POST(req) {
   try {
     const { username, password } = await req.json();
 
-    const res = await fetch(`http://127.0.0.1:8000/auth/login`, {
+    const res = await fetch(`http://localhost:8000/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
@@ -19,11 +20,12 @@ export async function POST(req) {
     }
 
     const data = await res.json();
-
+    // console.log("DATA + + + + ",data);
+    
     // Assuming backend returns access_token and refresh_token in body
     const accessToken = data.access_token;
     const refreshToken = data.refresh_token;
-
+    const profile_usename = data.username;
     const cookieStore = await cookies();
 
     // Access token cookie

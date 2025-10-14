@@ -6,8 +6,10 @@ export async function POST(req) {
     
     console.log("Bob");
     
-    const backendRes = await fetch(`http://127.0.0.1:8000/auth/register`, {
+    const backendRes = await fetch(`http://localhost:8000/auth/register`, {
       method: "POST",
+      credentials: "include",
+
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
