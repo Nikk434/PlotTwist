@@ -116,6 +116,11 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
         hostedBy: {
             userId: null,
             username: null
+        },
+        participants: {
+            minCount: 3,
+            maxCount: 6,
+            userIds: []
         }
     })
 
@@ -135,6 +140,10 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                         hostedBy: {
                             userId: data.profile.user_id,
                             username: data.profile.username
+                        },
+                        participants: {
+                            ...prev.participants,
+                            userIds: [data.profile.user_id]
                         }
                     }))
                 } else {
@@ -209,6 +218,7 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
     const summaryItems = [
         { label: 'Host', value: settings.hostedBy.username || 'Loading...' },
         { label: 'Time', value: `${settings.timeLimit} minutes` },
+        { label: 'Participants', value: `${settings.participants.minCount}-${settings.participants.maxCount} writers` },
         { label: 'Genres', value: settings.genres.join(', ') },
         { label: 'Prompt', value: `${settings.isBlindPrompt ? '[BLIND] ' : ''}${settings.promptText}` },
         ...(settings.promptType === 'Plot Twist Injection' && settings.plotTwistText
@@ -317,6 +327,64 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                             onSelect={handleGenreToggle}
                             colorScheme="green"
                         />
+                    </div>
+
+                    {/* Participants */}
+                    <div style={{ marginBottom: '32px' }}>
+                        <SectionHeader
+                            icon="👥"
+                            title="Participants"
+                            badge={{ type: 'fixed', text: 'FIXED' }}
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                                    Minimum Writers
+                                </label>
+                                <input
+                                    type="number"
+                                    min="2"
+                                    max={settings.participants.maxCount}
+                                    value={settings.participants.minCount}
+                                    onChange={(e) => {
+                                        const val = Math.max(2, Math.min(settings.participants.maxCount, parseInt(e.target.value) || 2))
+                                        updateSetting('participants', { ...settings.participants, minCount: val })
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '8px',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                                    Maximum Writers
+                                </label>
+                                <input
+                                    type="number"
+                                    min={settings.participants.minCount}
+                                    max="10"
+                                    value={settings.participants.maxCount}
+                                    onChange={(e) => {
+                                        const val = Math.max(settings.participants.minCount, Math.min(10, parseInt(e.target.value) || 6))
+                                        updateSetting('participants', { ...settings.participants, maxCount: val })
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        border: '2px solid #e5e7eb',
+                                        borderRadius: '8px',
+                                        fontSize: '16px'
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
+                            Battle will start when minimum participants join. Maximum {settings.participants.maxCount} writers allowed.
+                        </p>
                     </div>
 
                     {/* Challenge Prompt */}
@@ -524,7 +592,7 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                                 boxShadow: settings.hostedBy.userId ? '0 4px 6px rgba(16, 185, 129, 0.3)' : 'none'
                             }}
                         >
-                            🚀 Start Match
+                            🚀 Create Match
                         </button>
                     </div>
                 </div>
