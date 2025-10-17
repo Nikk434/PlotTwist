@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const GENRES = [
     'Horror', 'Comedy', 'Sci-Fi', 'Drama', 'Action', 'Romance', 'Thriller', 'Fantasy',
@@ -112,10 +112,42 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
         objectInclusion: '',
         reverseChallenge: false,
         isBlindPrompt: true,
-        plotTwistText: ''
+        plotTwistText: '',
+        hostedBy: {
+            userId: null,
+            username: null
+        }
     })
 
     const [errors, setErrors] = useState({})
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/auth/me', {
+                    credentials: 'include'
+                })
+
+                if (response.ok) {
+                    const data = await response.json()
+                    setSettings(prev => ({
+                        ...prev,
+                        hostedBy: {
+                            userId: data.profile.user_id,
+                            username: data.profile.username
+                        }
+                    }))
+                } else {
+                    setErrors({ general: 'Not authenticated' })
+                }
+            } catch (error) {
+                console.error('Failed to fetch user:', error)
+                setErrors({ general: 'Failed to load user data' })
+            }
+        }
+
+        fetchCurrentUser()
+    }, [])
 
     const updateSetting = (key, value) => {
         setSettings(prev => ({ ...prev, [key]: value }))
@@ -140,41 +172,42 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
         if (settings.promptType === 'Plot Twist Injection' && !settings.plotTwistText.trim()) {
             newErrors.plotTwistText = 'Plot twist details are required'
         }
+        if (!settings.hostedBy.userId) {
+            newErrors.general = 'User not authenticated'
+        }
 
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
 
     const handleStartMatch = async () => {
-        if (!validateSettings()) return  // Use existing validation
+        if (!validateSettings()) return
 
         try {
             const response = await fetch('/api/match/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(settings),  // Use component state directly
+                body: JSON.stringify(settings),
             })
 
             if (!response.ok) {
-                const errText = await response.text()
-                throw new Error(`Failed to create match: ${errText}`)
+                const errData = await response.json()
+                throw new Error(errData.error || 'Failed to create match')
             }
 
             const result = await response.json()
             console.log('Match created:', result)
 
-            // Call the parent callback if needed
             onStartMatch?.(settings)
-            window.location.href = '/StoryEditor';
+            window.location.href = '/StoryEditor'
         } catch (error) {
             console.error('Error creating match:', error.message)
-            setErrors({ general: error.message })  // Show error in UI
+            setErrors({ general: error.message })
         }
     }
 
-
-
     const summaryItems = [
+        { label: 'Host', value: settings.hostedBy.username || 'Loading...' },
         { label: 'Time', value: `${settings.timeLimit} minutes` },
         { label: 'Genres', value: settings.genres.join(', ') },
         { label: 'Prompt', value: `${settings.isBlindPrompt ? '[BLIND] ' : ''}${settings.promptText}` },
@@ -215,6 +248,46 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                 </div>
 
                 <div style={{ padding: '32px' }}>
+                    {/* General Error */}
+                    <ErrorMessage error={errors.general} />
+
+                    {/* Host Info */}
+                    {settings.hostedBy.username && (
+                        <div style={{
+                            backgroundColor: '#ede9fe',
+                            border: '2px solid #a78bfa',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            marginBottom: '24px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                backgroundColor: '#8b5cf6',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                fontSize: '18px'
+                            }}>
+                                {settings.hostedBy.username.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>
+                                    Hosted by
+                                </div>
+                                <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1e293b' }}>
+                                    {settings.hostedBy.username}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Time Limit */}
                     <div style={{ marginBottom: '32px' }}>
                         <SectionHeader
@@ -253,14 +326,6 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                             title="Challenge Prompt"
                             badge={{ type: 'fixed', text: 'FIXED' }}
                         />
-
-                        {/* <div style={{ marginBottom: '16px' }}>
-                            <CheckboxField
-                                checked={settings.isBlindPrompt}
-                                onChange={(e) => updateSetting('isBlindPrompt', e.target.checked)}
-                                label="Blind Challenge (prompt revealed after match starts)"
-                            />
-                        </div> */}
 
                         <select
                             value={settings.promptType}
@@ -442,18 +507,21 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                             Cancel
                         </button>
                         <button
-                            onClick={() => handleStartMatch()}
+                            onClick={handleStartMatch}
+                            disabled={!settings.hostedBy.userId}
                             style={{
                                 padding: '12px 24px',
                                 fontSize: '16px',
                                 fontWeight: 'bold',
                                 border: 'none',
                                 borderRadius: '8px',
-                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                background: settings.hostedBy.userId 
+                                    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                                    : '#d1d5db',
                                 color: 'white',
-                                cursor: 'pointer',
+                                cursor: settings.hostedBy.userId ? 'pointer' : 'not-allowed',
                                 minWidth: '120px',
-                                boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)'
+                                boxShadow: settings.hostedBy.userId ? '0 4px 6px rgba(16, 185, 129, 0.3)' : 'none'
                             }}
                         >
                             🚀 Start Match
