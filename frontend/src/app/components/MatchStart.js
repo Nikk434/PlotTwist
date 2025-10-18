@@ -208,7 +208,7 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
             console.log('Match created:', result)
 
             onStartMatch?.(settings)
-            window.location.href = '/StoryEditor'
+            window.location.href = '/MatchLobby'
         } catch (error) {
             console.error('Error creating match:', error.message)
             setErrors({ general: error.message })
