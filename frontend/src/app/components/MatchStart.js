@@ -205,10 +205,11 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
             }
 
             const result = await response.json()
-            console.log('Match created:', result)
-
+            const matchId = result.data._id;
+            console.log('Match ID:', matchId)
             onStartMatch?.(settings)
-            window.location.href = '/MatchLobby'
+            // window.location.href = '/MatchLobby'
+            window.location.href = `/MatchLobby/${matchId}`
         } catch (error) {
             console.error('Error creating match:', error.message)
             setErrors({ general: error.message })
