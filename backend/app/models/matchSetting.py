@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-from typing import List, Optional
+from typing import List, Optional, Literal
+from datetime import datetime
 
 
 class HostedBy(BaseModel):
@@ -35,6 +36,9 @@ class MatchSettings(BaseModel):
     reverseChallenge: bool = Field(False, description="Enable reverse challenge mode")
     isBlindPrompt: bool = Field(False, description="Hide prompt from participants")
     plotTwistText: Optional[str] = Field('', description="Custom plot twist text")
+
+    status: Literal["created", "active", "finished"] = Field("created", description="Current match status")
+    startedAt: Optional[datetime] = Field(None, description="Timestamp when the match starts")
 
     @field_validator('promptText')
     @classmethod
