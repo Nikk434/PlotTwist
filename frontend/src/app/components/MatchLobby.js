@@ -8,10 +8,53 @@ export default function MatchLobby({ matchId }) {
   const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  console.log("MATCHA = = = = ",matchId);
-  
+  console.log("MATCHA = = = = ", matchId);
+
+  const fetchMatchData = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/match/${matchId}`, {
+        credentials: 'include'
+      })
+      if (!res.ok) throw new Error('Failed to fetch match')
+
+      const response = await res.json()
+      console.log("res = = = ", response);
+      console.log("res DATA = = = ", response.data);
+
+
+      setMatchData(response.data)
+      if (response.data.status === 'active') {
+        window.location.href = '/StoryEditor'
+        return  // Stop processing
+      }
+      const readyUsers = response.data.ready_users || []
+      const allUserIds = [...new Set([...response.data.participants.userIds, ...readyUsers])]
+
+      const participantList = allUserIds.map(userId => {
+        const isHost = userId === response.data.hostedBy.userId
+        return {
+          userId: userId,
+          username: isHost ? response.data.hostedBy.username : 'User',
+          isReady: readyUsers.includes(userId),
+          isHost: isHost
+        }
+      })
+
+      setParticipants(participantList)
+
+      // Set current user's ready status - WAIT for currentUserId
+      if (currentUserId) {
+        setIsReady(readyUsers.includes(currentUserId))
+      }
+
+      setLoading(false)
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // Fetch current user
     const fetchUser = async () => {
       try {
         const res = await fetch('http://localhost:8000/auth/me', {
@@ -26,59 +69,31 @@ export default function MatchLobby({ matchId }) {
       }
     }
 
-    // Fetch match data
-    const fetchMatchData = async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/match/${matchId}`, {
-          credentials: 'include'
-        })
-        if (!res.ok) throw new Error('Failed to fetch match')
-        
-        const data = await res.json()
-        setMatchData(data)
-        console.log("DATATDDTADTADTADTADTATDT = = = = ",data );
-        
-        
-        // Mock participants with readiness status
-        // Replace with actual API call
-        setParticipants([
-          { 
-            userId: data.data.hostedBy.userId, 
-            username: data.data.hostedBy.username, 
-            isReady: true,
-            isHost: true 
-          }
-        ])
-        
-        // setLoading(false)
-        setLoading(true)
-
-      } catch (err) {
-        setError(err.message)
-        // setLoading(false)
-        setLoading(true)
-
-      }
-    }
-
     fetchUser()
     fetchMatchData()
 
-    // Poll for updates every 2 seconds
-    // const interval = setInterval(fetchMatchData, 2000)
+    const interval = setInterval(fetchMatchData, 2000)
     return () => clearInterval(interval)
-  }, [matchId])
+  }, [matchId, currentUserId])
 
   const handleReadyToggle = async () => {
-    // Call API to toggle ready status
     try {
-      await fetch(`http://localhost:8000/match/${matchId}/ready`, {
+      const res = await fetch(`http://localhost:8000/match/${matchId}/ready`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isReady: !isReady })
       })
-      setIsReady(!isReady)
+
+      if (res.ok) {
+        const result = await res.json()
+        console.log("REDA = = = ", result);
+
+        setIsReady(result.data.isReady)  // Use backend response
+
+        // Refresh match data to update participant list
+        fetchMatchData()
+      }
     } catch (err) {
       console.error('Failed to update ready status:', err)
     }
@@ -86,7 +101,7 @@ export default function MatchLobby({ matchId }) {
 
   const handleStartMatch = async () => {
     try {
-      await fetch(`http://localhost:8000//match/${matchId}/start`, {
+      await fetch(`http://localhost:8000/match/${matchId}/start`, {
         method: 'POST',
         credentials: 'include'
       })
@@ -96,12 +111,12 @@ export default function MatchLobby({ matchId }) {
     }
   }
 
-  if (false) {
+  if (loading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         minHeight: '100vh',
         fontSize: '18px',
         color: '#6b7280'
@@ -113,9 +128,9 @@ export default function MatchLobby({ matchId }) {
 
   if (error) {
     return (
-      <div style={{ 
-        maxWidth: '600px', 
-        margin: '100px auto', 
+      <div style={{
+        maxWidth: '600px',
+        margin: '100px auto',
         padding: '24px',
         backgroundColor: '#fee2e2',
         border: '2px solid #ef4444',
@@ -128,9 +143,13 @@ export default function MatchLobby({ matchId }) {
     )
   }
 
-  const isHost = currentUserId === matchData.data?.hostedBy?.userId
-  const readyCount = participants.filter(p => p.isReady).length
-  const canStart = isHost && readyCount >= matchData.data?.participants?.minCount
+  const isHost = currentUserId === matchData?.hostedBy?.userId
+  // const readyCount = participants.filter(p => p.isReady).length
+  const readyCount = matchData?.ready_users?.length || 0
+  console.log("RC = = = ", readyCount);
+
+  const canStart = isHost && readyCount >= matchData?.participants?.minCount
+  console.log("CS = = = = ", canStart);
 
   return (
     <div style={{
@@ -150,21 +169,21 @@ export default function MatchLobby({ matchId }) {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
             <div>
-              <h1 style={{ 
-                margin: '0 0 8px 0', 
-                fontSize: '32px', 
+              <h1 style={{
+                margin: '0 0 8px 0',
+                fontSize: '32px',
                 fontWeight: 'bold',
                 color: '#1e293b'
               }}>
                 🎬 Match Lobby
               </h1>
-              <p style={{ 
-                margin: 0, 
-                fontSize: '14px', 
+              <p style={{
+                margin: 0,
+                fontSize: '14px',
                 color: '#6b7280',
                 fontFamily: 'monospace'
               }}>
-                Match ID: {matchData.data?._id}
+                Match ID: {matchData?._id}
               </p>
             </div>
             <div style={{
@@ -177,7 +196,7 @@ export default function MatchLobby({ matchId }) {
                 Waiting for players
               </div>
               <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#7c3aed' }}>
-                {readyCount}/{matchData.data?.participants?.maxCount}
+                {readyCount}/{matchData?.participants?.maxCount}
               </div>
             </div>
           </div>
@@ -194,9 +213,9 @@ export default function MatchLobby({ matchId }) {
               marginBottom: '24px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}>
-              <h3 style={{ 
-                margin: '0 0 16px 0', 
-                fontSize: '18px', 
+              <h3 style={{
+                margin: '0 0 16px 0',
+                fontSize: '18px',
                 fontWeight: 'bold',
                 color: '#1e293b'
               }}>
@@ -215,11 +234,11 @@ export default function MatchLobby({ matchId }) {
                   fontWeight: 'bold',
                   fontSize: '20px'
                 }}>
-                  {matchData.data?.hostedBy?.username?.charAt(0).toUpperCase()}
+                  {matchData?.hostedBy?.username?.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#1e293b' }}>
-                    {matchData.data?.hostedBy?.username}
+                    {matchData?.hostedBy?.username}
                   </div>
                   <div style={{ fontSize: '14px', color: '#6b7280' }}>
                     Match Creator
@@ -235,55 +254,55 @@ export default function MatchLobby({ matchId }) {
               padding: '24px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}>
-              <h3 style={{ 
-                margin: '0 0 16px 0', 
-                fontSize: '18px', 
+              <h3 style={{
+                margin: '0 0 16px 0',
+                fontSize: '18px',
                 fontWeight: 'bold',
                 color: '#1e293b'
               }}>
                 ⚙️ Match Settings
               </h3>
               <div style={{ display: 'grid', gap: '12px' }}>
-                <SettingItem 
-                  icon="⏱️" 
-                  label="Time Limit" 
-                  value={`${matchData.data?.timeLimit} minutes`} 
+                <SettingItem
+                  icon="⏱️"
+                  label="Time Limit"
+                  value={`${matchData?.timeLimit} minutes`}
                 />
-                <SettingItem 
-                  icon="🎭" 
-                  label="Genres" 
-                  value={matchData.data?.genres?.join(', ')} 
+                <SettingItem
+                  icon="🎭"
+                  label="Genres"
+                  value={matchData?.genres?.join(', ')}
                 />
-                <SettingItem 
-                  icon="📝" 
-                  label="Prompt Type" 
-                  value={matchData.data?.promptType} 
+                <SettingItem
+                  icon="📝"
+                  label="Prompt Type"
+                  value={matchData?.promptType}
                 />
-                {matchData.data?.wordCap && (
-                  <SettingItem 
-                    icon="📊" 
-                    label="Word Limit" 
-                    value={`${matchData.data.wordCap} words`} 
+                {matchData?.wordCap && (
+                  <SettingItem
+                    icon="📊"
+                    label="Word Limit"
+                    value={`${matchData.wordCap} words`}
                   />
                 )}
-                {matchData.data?.objectInclusion && (
-                  <SettingItem 
-                    icon="🎯" 
-                    label="Must Include" 
-                    value={`"${matchData.data.objectInclusion}"`} 
+                {matchData?.objectInclusion && (
+                  <SettingItem
+                    icon="🎯"
+                    label="Must Include"
+                    value={`"${matchData.objectInclusion}"`}
                   />
                 )}
-                {matchData.data?.reverseChallenge && (
-                  <SettingItem 
-                    icon="🔄" 
-                    label="Special" 
-                    value="Reverse Challenge" 
+                {matchData?.reverseChallenge && (
+                  <SettingItem
+                    icon="🔄"
+                    label="Special"
+                    value="Reverse Challenge"
                   />
                 )}
               </div>
 
               {/* Prompt Preview */}
-              {!matchData.data?.isBlindPrompt && matchData.data?.promptText && (
+              {!matchData?.isBlindPrompt && matchData?.promptText && (
                 <div style={{
                   marginTop: '16px',
                   padding: '16px',
@@ -291,21 +310,21 @@ export default function MatchLobby({ matchId }) {
                   borderRadius: '8px',
                   borderLeft: '4px solid #8b5cf6'
                 }}>
-                  <div style={{ 
-                    fontSize: '12px', 
-                    fontWeight: 'bold', 
+                  <div style={{
+                    fontSize: '12px',
+                    fontWeight: 'bold',
                     color: '#6b7280',
                     marginBottom: '8px'
                   }}>
                     PROMPT
                   </div>
                   <div style={{ fontSize: '14px', color: '#1e293b' }}>
-                    {matchData.data.promptText}
+                    {matchData.promptText}
                   </div>
                 </div>
               )}
 
-              {matchData.data?.isBlindPrompt && (
+              {matchData?.isBlindPrompt && (
                 <div style={{
                   marginTop: '16px',
                   padding: '16px',
@@ -333,22 +352,22 @@ export default function MatchLobby({ matchId }) {
               padding: '24px',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}>
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '16px'
               }}>
-                <h3 style={{ 
-                  margin: 0, 
-                  fontSize: '18px', 
+                <h3 style={{
+                  margin: 0,
+                  fontSize: '18px',
                   fontWeight: 'bold',
                   color: '#1e293b'
                 }}>
                   👥 Participants
                 </h3>
                 <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                  {readyCount}/{matchData.data?.participants?.minCount} min
+                  {readyCount}/{matchData?.participants?.minCount} min
                 </div>
               </div>
 
@@ -382,8 +401,8 @@ export default function MatchLobby({ matchId }) {
                       {participant.username.charAt(0).toUpperCase()}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontWeight: 'bold', 
+                      <div style={{
+                        fontWeight: 'bold',
                         fontSize: '14px',
                         color: '#1e293b',
                         display: 'flex',
@@ -412,8 +431,8 @@ export default function MatchLobby({ matchId }) {
                 ))}
 
                 {/* Empty slots */}
-                {Array.from({ 
-                  length: matchData.data?.participants?.maxCount - participants.length 
+                {Array.from({
+                  length: matchData?.participants?.maxCount - participants.length
                 }).map((_, index) => (
                   <div
                     key={`empty-${index}`}
@@ -472,7 +491,7 @@ export default function MatchLobby({ matchId }) {
               {isHost && (
                 <button
                   onClick={handleStartMatch}
-                  disabled={!canStart}
+                  // disabled={canStart}
                   style={{
                     width: '100%',
                     padding: '14px',
@@ -486,7 +505,7 @@ export default function MatchLobby({ matchId }) {
                     boxShadow: canStart ? '0 4px 6px rgba(139, 92, 246, 0.3)' : 'none'
                   }}
                 >
-                  {canStart ? '🚀 Start Match' : `⏳ Waiting for ${matchData.data?.participants?.minCount - readyCount} more`}
+                  {canStart ? '🚀 Start Match' : `⏳ Waiting for ${matchData?.participants?.minCount - readyCount} more`}
                 </button>
               )}
 
@@ -499,7 +518,7 @@ export default function MatchLobby({ matchId }) {
                 color: '#92400e',
                 textAlign: 'center'
               }}>
-                Match starts when {matchData.data?.participants?.minCount} players are ready
+                Match starts when {matchData?.participants?.minCount} players are ready
               </div>
             </div>
           </div>
@@ -511,8 +530,8 @@ export default function MatchLobby({ matchId }) {
 
 function SettingItem({ icon, label, value }) {
   return (
-    <div style={{ 
-      display: 'flex', 
+    <div style={{
+      display: 'flex',
       justifyContent: 'space-between',
       padding: '8px 0',
       borderBottom: '1px solid #f1f5f9'
