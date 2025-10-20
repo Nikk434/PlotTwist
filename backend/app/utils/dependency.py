@@ -63,5 +63,5 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
     user = await user_collection.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
-    print("UUU",user)
+    # print("UUU",user)
     return user
