@@ -6,6 +6,8 @@ from app.utils.matcher_finder import get_valid_match
 from pydantic import BaseModel
 from bson import ObjectId
 from typing import Dict, Any
+from datetime import datetime
+
 
 router = APIRouter()
 
@@ -111,7 +113,7 @@ async def start_match(match_id: str, user=Depends(get_current_user)):
     # Update match status to started
     update_result = await match_setting.update_one(
         {"_id": ObjectId(match_id)},
-        {"$set": {"status": "active", "startedAt": "timestamp_here"}}
+        {"$set": {"status": "active", "startedAt": datetime.utcnow()}}
     )
 
     print(f"[START] Match status updated, result: {update_result.modified_count} document(s) modified")
