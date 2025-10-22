@@ -82,6 +82,17 @@ from typing import Optional, Dict, List
 from bson import ObjectId
 import re
 from html import unescape
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from datetime import datetime
+
+class Feedback(BaseModel):
+    fromUserId: str
+    stars: int = Field(..., ge=1, le=10)
+    comment: str
+    submittedAt: datetime = Field(default_factory=datetime.utcnow)
+
+
 
 
 class PyObjectId(ObjectId):
@@ -124,6 +135,10 @@ class TreatmentMetadata(BaseModel):
     total_words: int = Field(alias="totalWords")
     completed_at: str = Field(alias="completedAt")
     progress: float
+    model_config = {
+    "populate_by_name": True,
+    "extra": "ignore"
+}
 
 
 class RawTreatmentData(BaseModel):
@@ -133,9 +148,12 @@ class RawTreatmentData(BaseModel):
     completed_sections: List[str] = Field(alias="completedSections")
     metadata: TreatmentMetadata
 
-    class Config:
-        allow_population_by_field_name = True
-
+    # class Config:
+    #     allow_population_by_field_name = True
+    model_config = {
+    "populate_by_name": True,
+    "extra": "ignore"
+}
 
 class ProcessedTreatmentData(BaseModel):
     """Model for processed and validated treatment data"""
@@ -204,12 +222,12 @@ class ProcessedTreatmentData(BaseModel):
         return v
 
     class Config:
-        allow_population_by_field_name = True
+        # allow_population_by_field_name = True
         json_encoders = {ObjectId: str}
         arbitrary_types_allowed = True
 
 
-def process_raw_treatment(raw_data: dict) -> ProcessedTreatmentData:
+def process_raw_treatment(raw_data: dict,user_id: str) -> ProcessedTreatmentData:
     """Convert raw editor data to processed treatment data"""
     
     # Validate raw data first
@@ -219,6 +237,7 @@ def process_raw_treatment(raw_data: dict) -> ProcessedTreatmentData:
     
     # Extract clean text from HTML
     processed_data = {
+        "user_id": user_id,
         "title_page": extract_text_from_html(sections.get('title-page', '')),
         "logline": extract_text_from_html(sections.get('logline', '')),
         "synopsis": extract_text_from_html(sections.get('synopsis', '')),
@@ -252,6 +271,14 @@ def validate_treatment_data(raw_data: dict) -> ProcessedTreatmentData:
     except Exception as e:
         raise ValueError(f"Treatment validation failed: {str(e)}")
 
+class Story(BaseModel):
+    userId: str
+    matchId: str
+    content: RawTreatmentData  # use your validated model here
+    feedback: List[Feedback] = []
+    averageStars: float = 0.0
+    # createdAt: datetime = Field(default_factory=datetime.utcnow)
+    # updatedAt: datetime = Field(default_factory=datetime.utcnow)
 
 # Example usage with your data:
 if __name__ == "__main__":
