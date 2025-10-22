@@ -686,8 +686,8 @@ function ToolbarButton({ button, editor }) {
       onClick={() => button.action(editor)}
       disabled={!canExecute}
       className={`px-3 py-1.5 text-sm border rounded ${isActive
-          ? 'bg-blue-50 border-blue-200 text-blue-700'
-          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+        ? 'bg-blue-50 border-blue-200 text-blue-700'
+        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
         } ${!canExecute ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       style={button.style}
     >
@@ -760,12 +760,12 @@ function SectionNavigation({ sections, currentIndex, wordCounts, onSectionChange
             onClick={() => accessible && onSectionChange(index)}
             disabled={!accessible}
             className={`p-2 text-xs rounded-md border transition-colors ${current
-                ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
-                : completed
-                  ? 'border-green-300 bg-green-50 text-green-700'
-                  : accessible
-                    ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                    : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold'
+              : completed
+                ? 'border-green-300 bg-green-50 text-green-700'
+                : accessible
+                  ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                  : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
           >
             {completed && '✓ '}{section.title}
@@ -786,8 +786,8 @@ function NavigationButtons({ currentIndex, sectionsLength, canProceed, onPreviou
         onClick={onPrevious}
         disabled={isFirst}
         className={`px-4 py-2 text-sm rounded-md border ${isFirst
-            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
           }`}
       >
         Previous
@@ -797,8 +797,8 @@ function NavigationButtons({ currentIndex, sectionsLength, canProceed, onPreviou
         onClick={onNext}
         disabled={isLast || !canProceed}
         className={`px-4 py-2 text-sm rounded-md border ${(isLast || !canProceed)
-            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'border-blue-300 bg-blue-500 text-white hover:bg-blue-600'
+          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+          : 'border-blue-300 bg-blue-500 text-white hover:bg-blue-600'
           }`}
       >
         {isLast ? 'Finish' : 'Next'}
@@ -872,7 +872,7 @@ export default function TreatmentEditor() {
     return {
       sections: sectionContent,
       wordCounts: sectionWordCounts,
-      completedSections: TREATMENT_SECTIONS.filter(section => 
+      completedSections: TREATMENT_SECTIONS.filter(section =>
         (sectionWordCounts[section.id] || 0) >= section.minWords
       ).map(s => s.id),
       metadata: {
@@ -885,8 +885,8 @@ export default function TreatmentEditor() {
 
   const handleSubmit = async () => {
     const data = exportData()
-    console.log("Exp data = = ",data);
-    
+    console.log("Exp data = = ", data);
+
     try {
       const response = await fetch('/api/editor', {
         method: 'POST',
@@ -895,13 +895,22 @@ export default function TreatmentEditor() {
         },
         body: JSON.stringify(data),
       })
-      
-      if (!response.ok) throw new Error('Failed to save')
-      
-      const result = await response.json()
-      console.log('Success:', result)
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit story');
+      }
+
+      const result = await response.json();
+      console.log('Story submitted:', result);
+
+      // Redirect or show success message
+      alert('Story submitted successfully!');
+      window.location.href = '/match-results';
+
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error submitting story:', error);
+      alert(error.message);
     }
   }
   if (!editor) {
