@@ -15,6 +15,7 @@ from app.services import add_progress
 from app.match.setting import validate
 from app.match.metadata import info
 from app.services import editor
+from app.match.EditedStory import script
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -38,3 +39,4 @@ app.include_router(editor.router)
 # app.include_router(subscribe.router,tags=["noti hora ke"])
 app.include_router(validate.router,tags=["pop"])
 app.include_router(info.router)
+app.include_router(script.router)
