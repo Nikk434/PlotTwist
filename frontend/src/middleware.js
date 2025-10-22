@@ -19,8 +19,8 @@ export async function middleware(request) {
   
   // If has tokens and on auth page, redirect to dashboard/home
   if ((accessToken || refreshToken) && isAuthPage) {
+    console.log("log statement");
     return NextResponse.redirect(new URL('/home', request.url));
-    console.log("pappii");
     
   }
   
