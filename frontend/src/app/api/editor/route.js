@@ -1,23 +1,38 @@
+import { NextResponse } from 'next/server';
+
 export async function POST(request) {
   try {
-    const data = await request.json()
-    console.log("DATA = =  =",data);
+    const storyData = await request.json();
     
-    
-    // Validate data
-    if (!data.sections || !data.metadata) {
-      return Response.json({ error: 'Invalid data' }, { status: 400 })
+    console.log('Submitting story:', storyData);
+
+    // Forward to FastAPI backend
+    const response = await fetch('http://localhost:8000/story/submit', {
+      method: 'POST',
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+        'Cookie': request.headers.get('cookie') || '',
+      },
+      body: JSON.stringify(storyData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, error: data.detail || 'Failed to submit story' },
+        { status: response.status }
+      );
     }
-    
-    // Process/save data (database, file, etc.)
-    // const saved = await saveToDatabase(data)
-    
-    return Response.json({ 
-      success: true, 
-      message: 'Treatment saved successfully',
-      // data: saved 
-    })
+
+    return NextResponse.json(data, { status: 201 });
+
   } catch (error) {
-    return Response.json({ error: 'Server error' }, { status: 500 })
+    console.error('Story submission error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
