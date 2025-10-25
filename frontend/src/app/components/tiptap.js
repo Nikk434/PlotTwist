@@ -811,6 +811,10 @@ export default function TreatmentEditor() {
   const [currentSection, setCurrentSection] = useState(0)
   const [sectionContent, setSectionContent] = useState({})
   const [sectionWordCounts, setSectionWordCounts] = useState({})
+  const [currentUserId, setCurrentUserId] = useState(null)
+  const [matchId, setMatchId] = useState(null)
+
+  
 
   const currentSectionData = TREATMENT_SECTIONS[currentSection]
 
@@ -882,19 +886,61 @@ export default function TreatmentEditor() {
       }
     }
   }
+  useEffect(() => {
+  const fetchUserAndMatch = async () => {
+    // const [currentUserId, setCurrentUserId] = useState(null)
+    
+    try {
+      // Fetch current user
+      const userRes = await fetch('http://localhost:8000/auth/me', {
+        credentials: 'include'
+      })
+      if (userRes.ok) {
+        const userData = await userRes.json()
+        console.log("DADADADADADADAD = = = ",userData);
+        
+        setCurrentUserId(userData.profile.user_id)
+      }
+
+      // Get matchId from URL params (you'll need to pass this)
+      const params = new URLSearchParams(window.location.search)
+      const matchIdFromUrl = params.get('matchId')
+      setMatchId(matchIdFromUrl)
+    } catch (error) {
+      console.error('Failed to fetch user/match:', error)
+    }
+  }
+
+  fetchUserAndMatch()
+}, [])
 
   const handleSubmit = async () => {
     const data = exportData()
     console.log("Exp data = = ", data);
+    const storyPayload = {
+      userId: currentUserId,
+      matchId: matchId,
+      content: {
+        sections: data.sections,
+        wordCounts: data.wordCounts,
+        completedSections: data.completedSections,
+        metadata: data.metadata
+      },
+      feedback: [],
+      averageStars: 0.0,
+      status: "submitted"
+    }
+    console.log("Submitting story:", storyPayload);
 
-    try {
-      const response = await fetch('/api/editor', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+  try {
+    const response = await fetch('/api/editor', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(storyPayload),
+    })
 
       if (!response.ok) {
         const error = await response.json();
