@@ -952,7 +952,7 @@ export default function TreatmentEditor() {
 
       // Redirect or show success message
       alert('Story submitted successfully!');
-      window.location.href = '/match-results';
+      window.location.href = `/MatchResult/${matchId}`;
 
     } catch (error) {
       console.error('Error submitting story:', error);
