@@ -105,7 +105,8 @@ export default function MatchLobby({ matchId }) {
         method: 'POST',
         credentials: 'include'
       })
-      window.location.href = '/StoryEditor'
+      // window.location.href = '/StoryEditor'
+      window.location.href = `/StoryEditor?matchId=${matchId}`
     } catch (err) {
       console.error('Failed to start match:', err)
     }
