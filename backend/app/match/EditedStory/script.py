@@ -3,20 +3,19 @@ from app.models.story import process_raw_treatment
 from fastapi import APIRouter, HTTPException, status, Depends
 from app.models.story import Story
 from app.core.database import match_setting
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from bson import ObjectId
 from app.utils.matcher_finder import get_valid_match
 from app.utils.dependency import get_current_user
 from app.core.database import story_collection
 router = APIRouter()
 
-
-class MatchResponse(BaseModel):
+class SingleResponse(BaseModel):
     success: bool
     data: dict
 
 
-@router.post("/story/submit", response_model=MatchResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/story/submit", response_model=SingleResponse, status_code=status.HTTP_201_CREATED)
 async def submit_story_typed(story_structure: Story, user=Depends(get_current_user)):
     try:
         # Get user and match info
@@ -25,7 +24,9 @@ async def submit_story_typed(story_structure: Story, user=Depends(get_current_us
         match_id = story_structure.matchId
         match = await get_valid_match(match_id)
         processed_content = process_raw_treatment(story_structure.content.dict(), user_id=str(user["_id"]))
-        print("PPPP = = =",processed_content)
+        # print("PPPP = = =",processed_content)
+    
+
         story_data = {
             "user_id": user_id,
             "match_id": match_id,
@@ -50,7 +51,11 @@ async def submit_story_typed(story_structure: Story, user=Depends(get_current_us
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
-@router.get("/stories/match/{match_id}", response_model=MatchResponse)
+class MultiResponse(BaseModel):
+    success: bool
+    data: list[dict]
+
+@router.get("/stories/match/{match_id}", response_model=MultiResponse)
 async def get_match_stories(match_id: str, user=Depends(get_current_user)):
     try:
         print(f"[GET_STORIES] Fetching stories for match: {match_id}")
@@ -99,8 +104,17 @@ async def get_match_stories(match_id: str, user=Depends(get_current_user)):
             detail=f"Failed to fetch stories: {str(e)}"
         )
 
+class MatchResponse(BaseModel):
+    success: bool
+    data: dict
+
+class RatingInput(BaseModel):
+    stars: int = Field(..., ge=1, le=10)
+    comment: str
+
 @router.post("/story/{story_id}/rate", response_model=MatchResponse)
-async def rate_story(story_id: str, rating_data: dict, user=Depends(get_current_user)):
+async def rate_story(story_id: str, rating_data: RatingInput, user=Depends(get_current_user)):
+
     try:
         print(f"[RATE_STORY] Rating story: {story_id}")
         
@@ -138,15 +152,15 @@ async def rate_story(story_id: str, rating_data: dict, user=Depends(get_current_
             )
         
         # Validate rating
-        stars = rating_data.get("stars")
-        comment = rating_data.get("comment", "").strip()
-        
-        if not stars or stars < 1 or stars > 10:
+        stars = rating_data.stars
+        comment = rating_data.comment.strip() if rating_data.comment else ""
+
+        if not (1 <= stars <= 10):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Rating must be between 1 and 10"
             )
-        
+
         if len(comment) < 10:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
