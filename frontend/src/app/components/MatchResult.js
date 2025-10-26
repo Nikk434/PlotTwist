@@ -32,7 +32,7 @@ export default function MatchResults({ matchId }) {
         setMatchData(matchResult.data)
 
         // Fetch all stories for this match
-        const storiesRes = await fetch(`http://localhost:8000/stories/submit/${matchId}`, {
+        const storiesRes = await fetch(`http://localhost:8000/stories/match/${matchId}`, {
           credentials: 'include'
         })
         const storiesResult = await storiesRes.json()
@@ -178,7 +178,7 @@ export default function MatchResults({ matchId }) {
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">⭐</span>
                     <span className="text-xl font-bold text-gray-900">
-                      {selectedStory.averageStars?.toFixed(1) || '0.0'}
+                      {selectedStory.average_stars?.toFixed(1) || '0.0'}
                     </span>
                     <span className="text-sm text-gray-500">
                       ({selectedStory.feedback?.length || 0} reviews)
@@ -260,7 +260,7 @@ export default function MatchResults({ matchId }) {
                           onClick={() => setRating(star)}
                           className="text-3xl transition-transform hover:scale-110"
                         >
-                          {star <= (hoveredRating || rating) ? '⭐' : '☆'}
+                          {star <= (hoveredRating || rating) ? '⭐' : 'op'}
                         </button>
                       ))}
                     </div>
@@ -327,7 +327,7 @@ export default function MatchResults({ matchId }) {
                           <div className="font-medium text-gray-900">Anonymous Reviewer</div>
                           <div className="flex items-center gap-1">
                             <span className="text-yellow-500">⭐</span>
-                            <span className="font-semibold">{review.stars}/10</span>
+                            <span className="font-semibold text-black">{review.stars}/10</span>
                           </div>
                         </div>
                         <p className="text-gray-700">{review.comment}</p>
@@ -374,8 +374,8 @@ export default function MatchResults({ matchId }) {
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex items-center gap-1">
                           <span className="text-yellow-500">⭐</span>
-                          <span className="text-sm font-medium">
-                            {story.averageStars?.toFixed(1) || '0.0'}
+                          <span className="text-sm font-medium text-black">
+                            {story.average_stars?.toFixed(1) || '10'}
                           </span>
                         </div>
                         <span className="text-xs text-gray-500">
