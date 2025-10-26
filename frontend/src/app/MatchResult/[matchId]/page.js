@@ -1,10 +1,11 @@
 'use client'
-// import MatchLobby from './components/MatchLobby'
-import { use } from 'react'
-import MatchResult from "@/app/components/MatchResult";
+import React from "react"
+import MatchResult from "@/app/components/MatchResult"
+
 export default function MatchResultsPage({ params }) {
-    const { matchId } = use(params)
-    console.log("MATCHA 3 = = = = ", matchId);
+    const { matchId } = React.use(params) // unwrap the promise
+
+    console.log("MATCHA 3 = = = = ", matchId)
 
     if (!matchId) {
         return (
@@ -20,5 +21,6 @@ export default function MatchResultsPage({ params }) {
             </div>
         )
     }
-    return <MatchResult matchId={params.matchId} />
+
+    return <MatchResult matchId={matchId} />
 }
