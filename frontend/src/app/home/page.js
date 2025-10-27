@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 // import MatchSettings from '../components/MatchStart';
 import { useRouter } from 'next/navigation';
-import { 
-  PlayIcon, 
-  TrophyIcon, 
-  ClockIcon, 
+import {
+  PlayIcon,
+  TrophyIcon,
+  ClockIcon,
   UserGroupIcon,
   LightBulbIcon,
   SparklesIcon,
@@ -18,34 +18,35 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function HomePage() {
-  const router=useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   // const [error, setError] = useState("");
   // const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
   useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/auth/me", {
-        headers: { "Content-Type": "application/json" },
-        credentials: "include"
-      });
-      const data = await res.json();
-      console.log("res",data.profile.username);
-      if (res.ok) {
-        console.log("OPOPOP");
-        setUsername(data.profile.username);
-        setIsLoggedIn(true);
-      }
-    } catch (err) {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/auth/me", {
+          headers: { "Content-Type": "application/json" },
+          credentials: "include"
+        });
+        const data = await res.json();
+        console.log("res", data.profile.username);
+        if (res.ok) {
+          console.log("OPOPOP");
+          setUsername(data.profile.username);
+          setIsLoggedIn(true);
+        }
+      } catch (err) {
         console.log("popop");
 
-      setIsLoggedIn(false);
-    }
-  };
+        setIsLoggedIn(false);
+      }
+    };
 
-  checkAuth();
-}, []);
+    checkAuth();
+  }, []);
+
   // Mock data for featured battles
   const featuredBattles = [
     {
@@ -110,8 +111,22 @@ export default function HomePage() {
     }
   };
   // function StartBattle() {
-    // const [BattleStart,setBattleStart] = useState(false);
+  // const [BattleStart,setBattleStart] = useState(false);
   // }
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        window.location.href = '/auth/login';
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -121,7 +136,7 @@ export default function HomePage() {
             <SparklesIcon className="h-8 w-8 text-purple-600" />
             <h1 className="text-2xl font-bold text-gray-900">PlotTwist</h1>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
               <>
@@ -130,7 +145,7 @@ export default function HomePage() {
                   Leaderboard
                 </Button>
                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700"
-                  >
+                >
                   <PlayIcon className="h-4 w-4 mr-2" />
                   Quick Battle
                 </Button>
@@ -159,16 +174,16 @@ export default function HomePage() {
             Chess.com for <span className="text-purple-600">Filmmakers</span>
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Battle other creators in fast-paced storytelling competitions. 
+            Battle other creators in fast-paced storytelling competitions.
             Write scripts, develop characters, and prove your creative skills in real-time.
           </p>
-          
+
           {
             <div className="flex justify-center space-x-4">
               <Button size="lg" className="bg-purple-600 hover:bg-purple-700"
                 // onClick={()=>setBattleStart(true)}
-                onClick={()=>router.push("match/start")}
-                >
+                onClick={() => router.push("match/start")}
+              >
                 <PlayIcon className="h-5 w-5 mr-2" />
                 Start Your First Battle
               </Button>
@@ -176,6 +191,10 @@ export default function HomePage() {
               <Button variant="outline" size="lg">
                 <LightBulbIcon className="h-5 w-5 mr-2" />
                 How It Works
+              </Button>
+              <Button variant="outline" size="lg" onClick={handleLogout}>
+                <LightBulbIcon className="h-5 w-5 mr-2" />
+                LOG OUT
               </Button>
             </div>
           }
@@ -190,7 +209,7 @@ export default function HomePage() {
                 View All
               </Button>
             </div>
-            
+
             <div className="space-y-4">
               {featuredBattles.map((battle) => (
                 <Card key={battle.id} className="hover:shadow-md transition-shadow cursor-pointer">
@@ -209,24 +228,24 @@ export default function HomePage() {
                         {battle.timeLeft}
                       </div>
                     </div>
-                    
+
                     <h3 className="font-semibold text-lg text-gray-900 mb-2">
                       {battle.prompt}
                     </h3>
-                    
+
                     <div className="flex justify-between items-center">
                       <div className="flex items-center text-sm text-gray-600">
                         <UserGroupIcon className="h-4 w-4 mr-1" />
                         {battle.participants}/{battle.maxParticipants} writers
                       </div>
-                      
-                      <Button 
-                        size="sm" 
+
+                      <Button
+                        size="sm"
                         disabled={battle.status === 'full'}
                         className="bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
                       >
-                        {battle.status === 'full' ? 'Battle Full' : 
-                         battle.status === 'active' ? 'Spectate' : 'Join Battle'}
+                        {battle.status === 'full' ? 'Battle Full' :
+                          battle.status === 'active' ? 'Spectate' : 'Join Battle'}
                       </Button>
                     </div>
                   </CardContent>
@@ -348,7 +367,7 @@ export default function HomePage() {
         {/* How It Works Section */}
         <div className="mt-16 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-12">How PlotTwist Works</h2>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -359,7 +378,7 @@ export default function HomePage() {
                 Get matched with writers of similar skill level or join specific genre battles
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <BoltIcon className="h-8 w-8 text-purple-600" />
@@ -369,7 +388,7 @@ export default function HomePage() {
                 Create compelling stories, dialogue, or scripts within time limits using given prompts
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <TrophyIcon className="h-8 w-8 text-purple-600" />
