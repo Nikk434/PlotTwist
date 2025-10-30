@@ -12,7 +12,7 @@ export default function MatchLobby({ matchId }) {
 
   const fetchMatchData = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/match/${matchId}`, {
+      const res = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}`, {
         credentials: 'include'
       })
       if (!res.ok) throw new Error('Failed to fetch match')
@@ -57,7 +57,7 @@ export default function MatchLobby({ matchId }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('http://localhost:8000/auth/me', {
+        const res = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
           credentials: 'include'
         })
         if (res.ok) {
@@ -78,7 +78,7 @@ export default function MatchLobby({ matchId }) {
 
   const handleReadyToggle = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/match/${matchId}/ready`, {
+      const res = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}/ready`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,7 @@ export default function MatchLobby({ matchId }) {
 
   const handleStartMatch = async () => {
     try {
-      await fetch(`http://localhost:8000/match/${matchId}/start`, {
+      await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}/start`, {
         method: 'POST',
         credentials: 'include'
       })

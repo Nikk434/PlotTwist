@@ -7,7 +7,7 @@ export async function POST(request) {
     console.log('Submitting story:', storyData);
 
     // Forward to FastAPI backend
-    const response = await fetch('http://localhost:8000/story/submit', {
+    const response = await fetch('https://plottwist-x4aw.onrender.com/story/submit', {
       method: 'POST',
       credentials: "include",
       headers: {

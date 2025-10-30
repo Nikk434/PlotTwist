@@ -75,7 +75,7 @@ export async function POST(request) {
     console.log("Incoming settings:", settings)
 
     // Forward to FastAPI backend
-    const response = await fetch('http://localhost:8000/match/create', {
+    const response = await fetch('https://plottwist-x4aw.onrender.com/match/create', {
       method: 'POST',
       credentials: "include",
 

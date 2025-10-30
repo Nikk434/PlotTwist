@@ -16,7 +16,7 @@ export default function MatchResults({ matchId }) {
     const fetchData = async () => {
       try {
         // Fetch current user
-        const userRes = await fetch('http://localhost:8000/auth/me', {
+        const userRes = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
           credentials: 'include'
         })
         if (userRes.ok) {
@@ -25,14 +25,14 @@ export default function MatchResults({ matchId }) {
         }
 
         // Fetch match data
-        const matchRes = await fetch(`http://localhost:8000/match/${matchId}`, {
+        const matchRes = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}`, {
           credentials: 'include'
         })
         const matchResult = await matchRes.json()
         setMatchData(matchResult.data)
 
         // Fetch all stories for this match
-        const storiesRes = await fetch(`http://localhost:8000/stories/match/${matchId}`, {
+        const storiesRes = await fetch(`https://plottwist-x4aw.onrender.com/stories/match/${matchId}`, {
           credentials: 'include'
         })
         const storiesResult = await storiesRes.json()
@@ -73,7 +73,7 @@ export default function MatchResults({ matchId }) {
     setSubmittingReview(true)
 
     try {
-      const response = await fetch(`http://localhost:8000/story/${selectedStory._id}/rate`, {
+      const response = await fetch(`https://plottwist-x4aw.onrender.com/story/${selectedStory._id}/rate`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ export default function MatchResults({ matchId }) {
       alert('Review submitted successfully!')
       
       // Refresh stories to update ratings
-      const storiesRes = await fetch(`http://localhost:8000/stories/match/${matchId}`, {
+      const storiesRes = await fetch(`https://plottwist-x4aw.onrender.com/stories/match/${matchId}`, {
         credentials: 'include'
       })
       const storiesResult = await storiesRes.json()

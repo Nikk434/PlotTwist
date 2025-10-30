@@ -26,7 +26,7 @@ export default function HomePage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:8000/auth/me", {
+        const res = await fetch("https://plottwist-x4aw.onrender.com/auth/me", {
           headers: { "Content-Type": "application/json" },
           credentials: "include"
         });

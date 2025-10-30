@@ -27,7 +27,7 @@ export async function middleware(request) {
   // If only refresh token exists, try to refresh
   // if (!accessToken && refreshToken && !isAuthPage) {
   //   try {
-  //     const response = await fetch(`http://localhost:8000/auth/refresh`, {
+  //     const response = await fetch(`https://plottwist-x4aw.onrender.com/auth/refresh`, {
   //       method: 'POST',
   //       headers: {
   //         'Content-Type': 'application/json',

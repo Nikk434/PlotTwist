@@ -892,7 +892,7 @@ export default function TreatmentEditor() {
     
     try {
       // Fetch current user
-      const userRes = await fetch('http://localhost:8000/auth/me', {
+      const userRes = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
         credentials: 'include'
       })
       if (userRes.ok) {

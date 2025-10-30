@@ -129,7 +129,7 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
-                const response = await fetch('http://localhost:8000/auth/me', {
+                const response = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
                     credentials: 'include'
                 })
 
