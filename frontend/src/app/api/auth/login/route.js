@@ -21,34 +21,60 @@ export async function POST(req) {
 
     const data = await res.json();
     // console.log("DATA + + + + ",data);
-    
+
     // Assuming backend returns access_token and refresh_token in body
     const accessToken = data.access_token;
     const refreshToken = data.refresh_token;
     const profile_usename = data.username;
     const cookieStore = await cookies();
 
-    // Access token cookie
+    // FOR DEV 
+    // cookieStore.set({
+    //   name: "access_token",
+    //   value: accessToken,
+    //   httpOnly: true,
+    //   secure: false, // change to true in production
+    //   sameSite: "lax",
+    //   maxAge: 15 * 60,
+    //   path: "/",
+    // });
+
+    // // Refresh token cookie
+    // cookieStore.set({
+    //   name: "refresh_token",
+    //   value: refreshToken,
+    //   httpOnly: true,
+    //   secure: false, // change to true in production
+    //   sameSite: "lax",
+    //   maxAge: 7 * 24 * 60 * 60,
+    //   path: "/",
+    // });
+
+
+
+    // FOR PROD
     cookieStore.set({
       name: "access_token",
       value: accessToken,
       httpOnly: true,
-      secure: false, // change to true in production
-      sameSite: "lax",
+      secure: true,             // MUST be true in production (HTTPS)
+      sameSite: "none",         // Allows cross-origin cookies
       maxAge: 15 * 60,
       path: "/",
     });
 
-    // Refresh token cookie
     cookieStore.set({
       name: "refresh_token",
       value: refreshToken,
       httpOnly: true,
-      secure: false, // change to true in production
-      sameSite: "lax",
+      secure: true,             // same here
+      sameSite: "none",         // same here
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
+
+
+
 
     return new Response(JSON.stringify({ message: "Login successful" }), { status: 200 });
 
