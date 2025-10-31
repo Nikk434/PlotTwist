@@ -132,9 +132,12 @@ export default function MatchSettings({ onStartMatch, onCancel }) {
                 const response = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
                     credentials: 'include'
                 })
+                console.log("DADADADADADADTTTTTT ==== = = ",response);
 
                 if (response.ok) {
                     const data = await response.json()
+                    console.log("DADADADADADADTTTTTT ==== = = ",data);
+                    
                     setSettings(prev => ({
                         ...prev,
                         hostedBy: {
