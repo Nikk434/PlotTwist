@@ -19,7 +19,7 @@ from app.match.EditedStory import script
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080", "http://127.0.0.1:8080","https://plot-twist-lac.vercel.app","https://plot-twist-nikk434s-projects.vercel.app","https://plot-twist-342mrbf1t-nikk434s-projects.vercel.app"],  # Add your frontend URLs
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080", "http://127.0.0.1:8080","https://plot-twist-lac.vercel.app","https://plot-twist-nikk434s-projects.vercel.app","https://plot-twist-git-main-nikk434s-projects.vercel.app"],  # Add your frontend URLs
     allow_credentials=True,  # THIS IS THE KEY LINE - allows cookies
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
