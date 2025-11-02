@@ -57,7 +57,7 @@ export default function MatchLobby({ matchId }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
+        const res = await fetch('/api/auth/me', {  // Changed to relative path
           credentials: 'include'
         })
         if (res.ok) {

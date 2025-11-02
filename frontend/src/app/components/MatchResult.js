@@ -16,7 +16,7 @@ export default function MatchResults({ matchId }) {
     const fetchData = async () => {
       try {
         // Fetch current user
-        const userRes = await fetch('https://plottwist-x4aw.onrender.com/auth/me', {
+        const userRes = await fetch('/api/auth/me', {
           credentials: 'include'
         })
         if (userRes.ok) {

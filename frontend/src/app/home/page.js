@@ -23,30 +23,52 @@ export default function HomePage() {
   // const [error, setError] = useState("");
   // const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     try {
+  //       const res = await fetch("https://plottwist-x4aw.onrender.com/auth/me", {
+  //         headers: { "Content-Type": "application/json" },
+  //         credentials: "include"
+  //       });
+  //       const data = await res.json();
+  //       console.log("res", data.profile.username);
+  //       if (res.ok) {
+  //         console.log("OPOPOP");
+  //         setUsername(data.profile.username);
+  //         setIsLoggedIn(true);
+  //       }
+  //     } catch (err) {
+  //       console.log("popop");
+
+  //       setIsLoggedIn(false);
+  //     }
+  //   };
+
+  //   checkAuth();
+  // }, []);
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("https://plottwist-x4aw.onrender.com/auth/me", {
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch("/api/auth/me", {  // Changed from full URL to relative path
           credentials: "include"
         });
-        const data = await res.json();
-        console.log("res", data.profile.username);
+
         if (res.ok) {
-          console.log("OPOPOP");
+          const data = await res.json();
+          console.log("User:", data.profile.username);
           setUsername(data.profile.username);
           setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
         }
       } catch (err) {
-        console.log("popop");
-
+        console.error("Auth check failed:", err);
         setIsLoggedIn(false);
       }
     };
 
     checkAuth();
   }, []);
-
   // Mock data for featured battles
   const featuredBattles = [
     {
