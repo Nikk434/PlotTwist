@@ -16,6 +16,7 @@ from app.match.setting import validate
 from app.match.metadata import info
 from app.services import editor
 from app.match.EditedStory import script
+from app.match.Timer import timer
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -40,3 +41,4 @@ app.include_router(editor.router)
 app.include_router(validate.router,tags=["pop"])
 app.include_router(info.router)
 app.include_router(script.router)
+app.include_router(timer.router)
