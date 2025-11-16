@@ -26,7 +26,7 @@ export default function HomePage() {
   // useEffect(() => {
   //   const checkAuth = async () => {
   //     try {
-  //       const res = await fetch("https://plottwist-x4aw.onrender.com/auth/me", {
+  //       const res = await fetch("${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me", {
   //         headers: { "Content-Type": "application/json" },
   //         credentials: "include"
   //       });

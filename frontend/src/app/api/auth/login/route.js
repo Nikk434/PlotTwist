@@ -5,7 +5,7 @@ export async function POST(req) {
   try {
     const { username, password } = await req.json();
 
-    const res = await fetch(`https://plottwist-x4aw.onrender.com/auth/login`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },

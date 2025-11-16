@@ -6,7 +6,7 @@ export async function POST(req) {
     
     console.log("Bob");
     
-    const backendRes = await fetch(`https://plottwist-x4aw.onrender.com/auth/register`, {
+    const backendRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`, {
       method: "POST",
       credentials: "include",
 

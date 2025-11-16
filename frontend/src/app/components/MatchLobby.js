@@ -12,7 +12,7 @@ export default function MatchLobby({ matchId }) {
 
   const fetchMatchData = async () => {
     try {
-      const res = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}`, {
         credentials: 'include'
       })
       if (!res.ok) throw new Error('Failed to fetch match')
@@ -78,7 +78,7 @@ export default function MatchLobby({ matchId }) {
 
   const handleReadyToggle = async () => {
     try {
-      const res = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}/ready`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}/ready`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +101,7 @@ export default function MatchLobby({ matchId }) {
 
   const handleStartMatch = async () => {
     try {
-      await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}/start`, {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}/start`, {
         method: 'POST',
         credentials: 'include'
       })

@@ -25,14 +25,14 @@ export default function MatchResults({ matchId }) {
         }
 
         // Fetch match data
-        const matchRes = await fetch(`https://plottwist-x4aw.onrender.com/match/${matchId}`, {
+        const matchRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}`, {
           credentials: 'include'
         })
         const matchResult = await matchRes.json()
         setMatchData(matchResult.data)
 
         // Fetch all stories for this match
-        const storiesRes = await fetch(`https://plottwist-x4aw.onrender.com/stories/match/${matchId}`, {
+        const storiesRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/stories/match/${matchId}`, {
           credentials: 'include'
         })
         const storiesResult = await storiesRes.json()
@@ -73,7 +73,7 @@ export default function MatchResults({ matchId }) {
     setSubmittingReview(true)
 
     try {
-      const response = await fetch(`https://plottwist-x4aw.onrender.com/story/${selectedStory._id}/rate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/story/${selectedStory._id}/rate`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ export default function MatchResults({ matchId }) {
       alert('Review submitted successfully!')
       
       // Refresh stories to update ratings
-      const storiesRes = await fetch(`https://plottwist-x4aw.onrender.com/stories/match/${matchId}`, {
+      const storiesRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/stories/match/${matchId}`, {
         credentials: 'include'
       })
       const storiesResult = await storiesRes.json()
