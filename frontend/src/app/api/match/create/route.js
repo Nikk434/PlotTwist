@@ -75,7 +75,7 @@ export async function POST(request) {
     console.log("Incoming settings:", settings)
 
     // Forward to FastAPI backend
-    const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_URL}/match/create', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/create`, {
       method: 'POST',
       credentials: "include",
 

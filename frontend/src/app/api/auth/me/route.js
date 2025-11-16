@@ -1,7 +1,7 @@
 export async function GET(request) {
   try {
     // Forward request to FastAPI with cookies
-    const response = await fetch('${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
