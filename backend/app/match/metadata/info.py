@@ -37,7 +37,7 @@ async def get_match(match_id: str, user=Depends(get_current_user)):
 async def get_all_matches(user=Depends(get_current_user)):
     print(f"[GET_ALL_MATCHES] Authenticated user: {user['username']}")
 
-    matches_cursor = match_setting.find({})
+    matches_cursor = match_setting.find({"status": "active"})
     matches = await matches_cursor.to_list(length=None)
 
     # Convert ObjectId to string
