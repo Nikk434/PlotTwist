@@ -33,6 +33,26 @@ async def get_match(match_id: str, user=Depends(get_current_user)):
         "data": match
     }
 
+@router.get("/matches", response_model=list[MatchResponse])
+async def get_all_matches(user=Depends(get_current_user)):
+    print(f"[GET_ALL_MATCHES] Authenticated user: {user['username']}")
+
+    matches_cursor = match_setting.find({})
+    matches = await matches_cursor.to_list(length=None)
+
+    # Convert ObjectId to string
+    for m in matches:
+        m["_id"] = str(m["_id"])
+
+    print(f"[GET_ALL_MATCHES] Total matches fetched: {len(matches)}")
+    
+    return [
+        {
+            "success": True,
+            "data": m
+        }
+        for m in matches
+    ]
 
 @router.post("/match/{match_id}/ready")
 async def toggle_ready(match_id: str, user=Depends(get_current_user)):
