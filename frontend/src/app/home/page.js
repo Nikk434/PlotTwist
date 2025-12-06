@@ -1,10 +1,8 @@
 'use client'
-// import { useState } from 'react';
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-// import MatchSettings from '../components/MatchStart';
 import { useRouter } from 'next/navigation';
 import {
   PlayIcon,
@@ -14,48 +12,26 @@ import {
   LightBulbIcon,
   SparklesIcon,
   FireIcon,
-  BoltIcon
+  BoltIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
 
 export default function HomePage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // const [error, setError] = useState("");
-  // const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState("");
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     try {
-  //       const res = await fetch("${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me", {
-  //         headers: { "Content-Type": "application/json" },
-  //         credentials: "include"
-  //       });
-  //       const data = await res.json();
-  //       console.log("res", data.profile.username);
-  //       if (res.ok) {
-  //         console.log("OPOPOP");
-  //         setUsername(data.profile.username);
-  //         setIsLoggedIn(true);
-  //       }
-  //     } catch (err) {
-  //       console.log("popop");
+  const [activeMatches, setActiveMatches] = useState([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
 
-  //       setIsLoggedIn(false);
-  //     }
-  //   };
-
-  //   checkAuth();
-  // }, []);
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/auth/me", {  // Changed from full URL to relative path
+        const res = await fetch("/api/auth/me", {
           credentials: "include"
         });
 
         if (res.ok) {
           const data = await res.json();
-          console.log("User:", data.profile.username);
           setUsername(data.profile.username.charAt(0).toUpperCase());
           setIsLoggedIn(true);
         } else {
@@ -69,72 +45,60 @@ export default function HomePage() {
 
     checkAuth();
   }, []);
-  // Mock data for featured battles
-  const featuredBattles = [
-    {
-      id: 1,
-      genre: "Horror",
-      prompt: "Write opening scene for a psychological thriller",
-      participants: 3,
-      timeLeft: "12 min",
-      maxParticipants: 4,
-      status: "waiting"
-    },
-    {
-      id: 2,
-      genre: "Comedy",
-      prompt: "Create dialogue between two characters stuck in elevator",
-      participants: 2,
-      timeLeft: "8 min",
-      maxParticipants: 3,
-      status: "active"
-    },
-    {
-      id: 3,
-      genre: "Sci-Fi",
-      prompt: "Character discovers they're living in simulation",
-      participants: 4,
-      timeLeft: "Starting soon",
-      maxParticipants: 4,
-      status: "full"
-    }
-  ];
 
-  // Mock leaderboard data
-  const topWriters = [
-    { rank: 1, name: "StoryMaster", rating: 1847, badge: "🏆" },
-    { rank: 2, name: "PlotGenius", rating: 1632, badge: "🥈" },
-    { rank: 3, name: "ScriptWiz", rating: 1598, badge: "🥉" },
-    { rank: 4, name: "CreativeKing", rating: 1456, badge: "" },
-    { rank: 5, name: "WordSmith", rating: 1389, badge: "" }
-  ];
+  useEffect(() => {
+    const fetchActiveMatches = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/matches`, {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) throw new Error('Failed to fetch matches');
+        
+        const response = await res.json();
+        console.log("Active matches response:", response);
+        
+        // Response is an array of {success: true, data: {...}} objects
+        if (Array.isArray(response)) {
+          const mappedMatches = response
+            .filter(item => item.success && item.data) // Only process successful responses
+            .map(item => {
+              const match = item.data;
+              console.log("Processing match:", match._id);
+              
+              return {
+                id: match._id || match.id,
+                hostName: match.hostedBy?.username || 'Unknown',
+                hostInitial: (match.hostedBy?.username || 'U').charAt(0).toUpperCase(),
+                participants: match.participants?.userIds?.length || 0,
+                maxParticipants: match.maxPlayers || 6,
+                minParticipants: match.minPlayers || 3,
+                settings: {
+                  timeLimit: `${match.timeLimit || 20} minutes`,
+                  genres: match.genres || ['General'],
+                  promptType: match.promptType || 'Blind Challenge',
+                  wordLimit: `${match.wordLimit || 500} words`
+                },
+                status: match.status || 'waiting'
+              };
+            });
+          
+          console.log("Mapped matches:", mappedMatches);
+          setActiveMatches(mappedMatches);
+        } else {
+          setActiveMatches([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch matches:", err);
+        setActiveMatches([]);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
 
-  const dailyPrompt = {
-    genre: "Mystery",
-    prompt: "A librarian discovers a book that writes itself",
-    constraint: "Must include: vintage key, secret message, midnight deadline"
-  };
+    fetchActiveMatches();
+  }, []);
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'waiting': return 'bg-green-100 text-green-800';
-      case 'active': return 'bg-orange-100 text-orange-800';
-      case 'full': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'waiting': return 'Open';
-      case 'active': return 'Live';
-      case 'full': return 'Full';
-      default: return 'Unknown';
-    }
-  };
-  // function StartBattle() {
-  // const [BattleStart,setBattleStart] = useState(false);
-  // }
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/auth/logout', {
@@ -149,6 +113,11 @@ export default function HomePage() {
       console.error('Logout failed:', error);
     }
   };
+
+  const handleJoinMatch = (matchId) => {
+    router.push(`/MatchLobby/${matchId}`);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -185,22 +154,128 @@ export default function HomePage() {
             Write scripts, develop characters, and prove your creative skills in real-time.
           </p>
 
-          {
-            <div className="flex justify-center space-x-4">
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700"
-                // onClick={()=>setBattleStart(true)}
+          <div className="flex justify-center space-x-4">
+            <Button size="lg" className="bg-purple-600 hover:bg-purple-700"
+              onClick={() => router.push("match/start")}
+            >
+              <PlayIcon className="h-5 w-5 mr-2" />
+              Start Your First Battle
+            </Button>
+            <Button variant="outline" size="lg" onClick={handleLogout}>
+              LOG OUT
+            </Button>
+          </div>
+        </div>
+
+        {/* Active Match Lobby Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-gray-900">Active Match Lobbies</h2>
+            <Button variant="outline" onClick={() => router.push('/match/browse')}>
+              View All
+            </Button>
+          </div>
+
+          {/* Display all active matches */}
+          {loadingMatches ? (
+            <div className="flex justify-center">
+              <div className="animate-pulse bg-gray-200 rounded-xl h-96 w-80"></div>
+            </div>
+          ) : activeMatches.length === 0 ? (
+            <div className="max-w-xs mx-auto text-center py-8">
+              <p className="text-gray-500">No active matches available</p>
+              <Button 
+                className="mt-4 bg-purple-600 hover:bg-purple-700"
                 onClick={() => router.push("match/start")}
               >
-                <PlayIcon className="h-5 w-5 mr-2" />
-                Start Your First Battle
-              </Button>
-              {/* {BattleStart && <MatchSettings/>} */}
-              <Button variant="outline" size="lg" onClick={handleLogout}>
-                {/* <LightBulbIcon className="h-5 w-5 mr-2" /> */}
-                LOG OUT
+                Create a Match
               </Button>
             </div>
-          }
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activeMatches.map((match) => (
+                <Card 
+                  key={match.id}
+                  className="bg-white shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 hover:border-purple-300"
+                  onClick={() => handleJoinMatch(match.id)}
+                >
+                  <CardHeader className="pb-0 pt-4 px-4 flex-col items-start">
+                    <div className="flex items-center justify-between w-full mb-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="text-2xl">🎬</div>
+                        <p className="text-xs uppercase font-bold text-gray-500">Match Lobby</p>
+                      </div>
+                      <Badge className="bg-green-100 text-green-800 border-green-300 text-xs">
+                        {match.participants}/{match.maxParticipants}
+                      </Badge>
+                    </div>
+                    <small className="text-gray-400 font-mono text-xs">
+                      ID: {match.id.slice(0, 12)}...
+                    </small>
+                    <h4 className="font-bold text-lg text-gray-900 mt-1">
+                      {match.settings.genres.join(" • ")}
+                    </h4>
+                  </CardHeader>
+                  
+                  <CardContent className="overflow-visible py-4 px-4">
+                    {/* Match Settings Visual */}
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 mb-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 flex items-center space-x-2">
+                            <ClockIcon className="h-4 w-4" />
+                            <span>Duration</span>
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">{match.settings.timeLimit}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 flex items-center space-x-2">
+                            <span>📝</span>
+                            <span>Word Limit</span>
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">{match.settings.wordLimit}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600 flex items-center space-x-2">
+                            <LockClosedIcon className="h-4 w-4" />
+                            <span>Type</span>
+                          </span>
+                          <span className="text-sm font-bold text-gray-900">{match.settings.promptType}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Players Preview */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-500 uppercase">Players</span>
+                        <span className="text-xs text-gray-500">{match.maxParticipants - match.participants} slots open</span>
+                      </div>
+                      <div className="flex -space-x-2">
+                        <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm border-2 border-white">
+                          {match.hostInitial}
+                        </div>
+                        {[...Array(match.maxParticipants - 1)].map((_, i) => (
+                          <div 
+                            key={i} 
+                            className="w-10 h-10 bg-gray-100 border-2 border-dashed border-gray-300 rounded-full flex items-center justify-center text-gray-400 text-sm"
+                          >
+                            ?
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                      <p className="text-xs font-semibold text-yellow-800">Waiting for players</p>
+                      <p className="text-xs text-yellow-600 mt-1">Click to join</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* How It Works Section */}
