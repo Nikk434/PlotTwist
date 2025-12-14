@@ -7,6 +7,11 @@ from pydantic import BaseModel
 from bson import ObjectId
 from typing import Dict, Any
 from datetime import datetime
+import socketio
+# from main import sio
+from socket_manager import sio
+from app.utils.serialize import serialize_match
+
 
 
 router = APIRouter()
@@ -61,46 +66,39 @@ async def get_all_matches(user=Depends(get_current_user)):
 
 @router.post("/match/{match_id}/ready")
 async def toggle_ready(match_id: str, user=Depends(get_current_user)):
-    print(f"[READY] Toggle ready request for match: {match_id}")
-    print(f"[READY] Current user: {user['username']}")
+    print(f"[READY] Toggle request: {match_id}")
 
     match = await get_valid_match(match_id)
-    print(f"[READY] Match found: {match_id}")
-
     user_id = str(user["_id"])
-    print(f"[READY] User ID: {user_id}")
 
-    # Initialize ready_users if not exists
-    if "ready_users" not in match:
-        match["ready_users"] = [match['hostedBy']['userId']]  # Use list, not set
-        print("[READY] Initialized ready_users with host")
-
-        print("[READY] Initialized empty ready_users list")
-
-    # Toggle ready status
-    if user_id in match["ready_users"]:
-        match["ready_users"].remove(user_id)
+    if user_id in match.get("ready_users", []):
+        await match_setting.update_one(
+            {"_id": ObjectId(match_id)},
+            {"$pull": {"ready_users": user_id}}
+        )
         is_ready = False
-        print(f"[READY] User {user_id} is now UNREADY")
     else:
-        match["ready_users"].append(user_id)
+        await match_setting.update_one(
+            {"_id": ObjectId(match_id)},
+            {"$addToSet": {"ready_users": user_id}}
+        )
         is_ready = True
-        print(f"[READY] User {user_id} is now READY")
 
-    # Update in database
-    result = await match_setting.update_one(
-        {"_id": ObjectId(match_id)},
-        {"$set": {"ready_users": match["ready_users"]}}
+    updated_match = await match_setting.find_one({"_id": ObjectId(match_id)})
+    print("[SOCKET] Emitting lobby_update")
+    await sio.emit(
+        "lobby_update",
+        serialize_match(updated_match),
+        room=match_id
     )
 
-    # print(f"[READY] Mongo update result: {result.modified_count} document(s) updated")
-    print(f"[READY] Ready count: {len(match['ready_users'])}")
-    print("isready = = = ",is_ready)
+    print("[READY] lobby_update emitted")
+
     return {
         "success": True,
         "data": {
             "isReady": is_ready,
-            "readyCount": len(match["ready_users"])
+            "readyCount": len(updated_match["ready_users"])
         }
     }
 
