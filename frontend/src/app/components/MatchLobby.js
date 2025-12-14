@@ -1,14 +1,39 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { io } from 'socket.io-client'
 
 export default function MatchLobby({ matchId }) {
   const [matchData, setMatchData] = useState(null)
-  const [participants, setParticipants] = useState([])
   const [currentUserId, setCurrentUserId] = useState(null)
   const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const socketRef = useRef(null)
+  
   console.log("MATCHA = = = = ", matchId);
+
+  // Compute participants dynamically from matchData
+  const participants = useMemo(() => {
+    if (!matchData) return []
+
+    const readyUsers = matchData.ready_users || []
+    const allUserIds = [
+      ...new Set([
+        ...(matchData.participants?.userIds || []),
+        ...readyUsers
+      ])
+    ]
+
+    return allUserIds.map(userId => {
+      const isHost = userId === matchData.hostedBy.userId
+      return {
+        userId,
+        username: isHost ? matchData.hostedBy.username : 'User',
+        isReady: readyUsers.includes(userId),
+        isHost
+      }
+    })
+  }, [matchData])
 
   const fetchMatchData = async () => {
     try {
@@ -21,29 +46,15 @@ export default function MatchLobby({ matchId }) {
       console.log("res = = = ", response);
       console.log("res DATA = = = ", response.data);
 
-
       setMatchData(response.data)
+      
       if (response.data.status === 'active') {
-        window.location.href = '/StoryEditor'
-        return  // Stop processing
+        window.location.href = `/StoryEditor?matchId=${matchId}`
+        return
       }
-      const readyUsers = response.data.ready_users || []
-      const allUserIds = [...new Set([...response.data.participants.userIds, ...readyUsers])]
 
-      const participantList = allUserIds.map(userId => {
-        const isHost = userId === response.data.hostedBy.userId
-        return {
-          userId: userId,
-          username: isHost ? response.data.hostedBy.username : 'User',
-          isReady: readyUsers.includes(userId),
-          isHost: isHost
-        }
-      })
-
-      setParticipants(participantList)
-
-      // Set current user's ready status - WAIT for currentUserId
       if (currentUserId) {
+        const readyUsers = response.data.ready_users || []
         setIsReady(readyUsers.includes(currentUserId))
       }
 
@@ -57,7 +68,7 @@ export default function MatchLobby({ matchId }) {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/auth/me', {  // Changed to relative path
+        const res = await fetch('/api/auth/me', {
           credentials: 'include'
         })
         if (res.ok) {
@@ -71,31 +82,66 @@ export default function MatchLobby({ matchId }) {
 
     fetchUser()
     fetchMatchData()
+  }, [matchId])
 
-    const interval = setInterval(fetchMatchData, 2000)
-    return () => clearInterval(interval)
+  useEffect(() => {
+    console.log("MAT ===", matchId);
+    console.log("CURRUSER===", currentUserId);
+    
+    if (!matchId || !currentUserId) return
+
+    console.log('[SOCKET] Connecting...')
+    socketRef.current = io('http://localhost:8000', {
+      transports: ['websocket'],
+      withCredentials: true
+    })
+
+    socketRef.current.on('connect', () => {
+      console.log('[SOCKET] Connected:', socketRef.current.id)
+      socketRef.current.emit('join_lobby', matchId)
+      console.log('[SOCKET] Joined lobby:', matchId)
+    })
+
+    socketRef.current.on('lobby_update', (updatedMatch) => {
+      console.log('[SOCKET] Lobby update received')
+      setMatchData(updatedMatch)
+      setIsReady(updatedMatch.ready_users?.includes(currentUserId))
+      
+      // Auto-redirect when match starts
+      if (updatedMatch.status === 'active') {
+        window.location.href = `/StoryEditor?matchId=${matchId}`
+      }
+    })
+
+    socketRef.current.on('disconnect', () => {
+      console.log('[SOCKET] Disconnected')
+    })
+
+    return () => {
+      console.log('[SOCKET] Cleaning up')
+      socketRef.current?.emit('leave_lobby', matchId)
+      socketRef.current?.disconnect()
+    }
   }, [matchId, currentUserId])
 
   const handleReadyToggle = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}/ready`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isReady: !isReady })
-      })
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/match/${matchId}/ready`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
 
-      if (res.ok) {
-        const result = await res.json()
-        console.log("REDA = = = ", result);
-
-        setIsReady(result.data.isReady)  // Use backend response
-
-        // Refresh match data to update participant list
-        fetchMatchData()
+      if (!res.ok) {
+        console.error('[READY] Toggle failed')
       }
-    } catch (err) {
-      console.error('Failed to update ready status:', err)
+
+      // DO NOT update state here - socket will handle it
+    } catch (e) {
+      console.error('[READY] Error', e)
     }
   }
 
@@ -105,7 +151,6 @@ export default function MatchLobby({ matchId }) {
         method: 'POST',
         credentials: 'include'
       })
-      // window.location.href = '/StoryEditor'
       window.location.href = `/StoryEditor?matchId=${matchId}`
     } catch (err) {
       console.error('Failed to start match:', err)
@@ -145,7 +190,6 @@ export default function MatchLobby({ matchId }) {
   }
 
   const isHost = currentUserId === matchData?.hostedBy?.userId
-  // const readyCount = participants.filter(p => p.isReady).length
   const readyCount = matchData?.ready_users?.length || 0
   console.log("RC = = = ", readyCount);
 
@@ -492,7 +536,7 @@ export default function MatchLobby({ matchId }) {
               {isHost && (
                 <button
                   onClick={handleStartMatch}
-                  // disabled={canStart}
+                  disabled={!canStart}
                   style={{
                     width: '100%',
                     padding: '14px',
