@@ -7,3 +7,4 @@ python-dotenv
 python-jose[cryptography]
 pydantic[email]
 bcrypt==3.2.2
+python-socketio[asyncio]

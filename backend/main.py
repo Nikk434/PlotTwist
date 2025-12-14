@@ -17,7 +17,17 @@ from app.match.metadata import info
 from app.services import editor
 from app.match.EditedStory import script
 from app.match.Timer import timer
+import socketio
+from socketio import ASGIApp
+
+from socket_manager import sio  # IMPORT SOCKET HERE
+
 app = FastAPI()
+
+socket_app = ASGIApp(
+    sio,
+    other_asgi_app=app
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080", "http://127.0.0.1:8080","https://plot-twist-lac.vercel.app","https://plot-twist-nikk434s-projects.vercel.app","https://plot-twist-git-main-nikk434s-projects.vercel.app"],  # Add your frontend URLs
